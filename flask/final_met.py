@@ -2,11 +2,15 @@ import pandas as pd
 import yfinance as yf
 from SmartApi import SmartConnect
 import pyotp
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
+import bcrypt
 from dotenv import load_dotenv
 import os
 # User Credentials
 load_dotenv()  # Load variables from .env file
+from flask_pymongo import PyMongo, MongoClient
+from flask_cors import CORS
+
 
 api_key = os.getenv("API_KEY")
 client_id = os.getenv("CLIENT_ID")
@@ -55,7 +59,10 @@ def convert_to_yfinance_symbol(angel_symbol):
     return f"{base_symbol}.NS"
 
 app = Flask(__name__, static_folder='../frontend/build', static_url_path='/')
+app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 
+mongo = PyMongo(app)
+CORS(app)
 def fetch_financial_metrics(angel_symbol, holding_data):
     """
     Fetches financial metrics for a given ticker symbol using yfinance.
@@ -153,6 +160,64 @@ def index():
     Serves the React frontend
     """
     return app.send_static_file('index.html')
+
+client = MongoClient(os.getenv("MONGO_URI"))  # MongoDB client
+db = client["hackfest2k25"]  # Database
+teams_collection = db["teams"]  # Collection
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    email = data.get('email')
+    full_name = data.get('fullName')
+    password = data.get('password')
+
+    if not email or not full_name or not password:
+        return jsonify({"error": "Please provide all fields"}), 400
+
+    if teams_collection.find_one({'email': email}):
+        return jsonify({"error": "User already exists"}), 409
+
+    # Hash password
+    hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+# Convert to a UTF-8 string before storing
+    hashed_pw_str = hashed_pw.decode('utf-8')
+
+    user_id = teams_collection.insert_one({
+        'email': email,
+        'fullName': full_name,
+        'password': hashed_pw_str
+    }).inserted_id
+
+    return jsonify({"message": "Registered successfully", "user_id": str(user_id)}), 201
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({"error": "Please provide email and password"}), 400
+
+    user = teams_collection.find_one({'email': email})
+
+    if not user or not bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+        return jsonify({"error": "Invalid credentials"}), 401
+
+
+    return jsonify({
+        "message": "Login successful",
+        "user_id": str(user['_id']),
+        "fullName": user['fullName']
+    })
+
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({"message": "Logged out successfully"})
 
 @app.route('/api/stocks')
 def get_stocks():

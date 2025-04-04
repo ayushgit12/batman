@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import StockMetricsDashboard from "./components/Metrics";
+import Homepage from "./components/Homepage";
+import AppDetails from "./components/AppDetails";
 
 // Sample data for fallback purposes
 const sampleStockData = {
@@ -32,18 +34,7 @@ const sampleStockData = {
 };
 
 // Simple Home component
-const Home = () => (
-  <div className="p-8 text-center">
-    <h1 className="text-3xl font-bold mb-4">Welcome to Stock Analysis</h1>
-    <p className="mb-4">A tool for analyzing your Angel One portfolio</p>
-    <Link
-      to="/dashboard"
-      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-    >
-      View Stock Dashboard
-    </Link>
-  </div>
-);
+
 
 // Portfolio Summary Component
 // Updated PortfolioSummary Component
@@ -286,8 +277,9 @@ const App = () => {
     <Router>
       <div className="min-h-screen bg-gray-100">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Homepage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/appdetails" element={<AppDetails />} />
         </Routes>
       </div>
     </Router>
