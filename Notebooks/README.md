@@ -1,5 +1,9 @@
 Best was stationary -  bi-Lstm - de-stationary
-proof -> <img width="228" alt="image" src="https://github.com/user-attachments/assets/80303801-0b17-45b7-a2a2-2b241973fec5" />
+- proof :
+
+
+<img width="228" alt="image" src="https://github.com/user-attachments/assets/d40e05f1-25f8-416e-a5e2-29bbe0a70c7d" />
+
 
 Abba was good as well
 
