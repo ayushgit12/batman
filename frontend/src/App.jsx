@@ -5,6 +5,9 @@ import StockMetricsDashboard from "./components/Metrics";
 import Homepage from "./components/Homepage";
 import AppDetails from "./components/AppDetails";
 import SearchStocks from "./components/SearchStocks";
+import ZerodhaPortfolio from "./components/ZerodhaPortfolio";
+import StockComparison from "./components/StockComparison";
+import StockComparisonChart from "./components/StockComparisonChart";
 
 // Sample data for fallback purposes
 const sampleStockData = {
@@ -282,6 +285,9 @@ const App = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/appdetails" element={<AppDetails />} />
           <Route path="/search" element={<SearchStocks />} />
+          <Route path="/zerodha" element={<ZerodhaPortfolio />} />
+          <Route path="/compare" element={<StockComparison />} />
+          <Route path="/comparisonchart" element={<StockComparisonChart />} />
         </Routes>
       </div>
     </Router>

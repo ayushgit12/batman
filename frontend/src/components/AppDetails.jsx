@@ -194,6 +194,8 @@ function AppDetails() {
       <Toaster position="top-center" />
 
       <Navbar />
+
+      <p className='text-center mt-8 text-orange-400 text-xl cursor-pointer'>Manually Upload Stocks?</p>
       
       <div className="max-w-7xl mx-auto">
         <div className="text-center">
