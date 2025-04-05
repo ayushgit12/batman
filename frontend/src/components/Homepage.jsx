@@ -10,7 +10,7 @@ const LoginModal = ({ isOpen, onClose }) => {
      const navigate = useNavigate();
 
      if(isOpen && localStorage.getItem('token')){
-          navigate("/dashboard");
+          navigate("/appdetails");
      }
 
   const [email, setEmail] = useState('');
@@ -131,7 +131,7 @@ const RegisterModal = ({ isOpen, onClose }) => {
      const navigate = useNavigate();
 
      if(isOpen && localStorage.getItem('token')){
-          navigate("/dashboard");
+          navigate("/appdetails");
      }
 
   const [fullName, setFullName] = useState('');
@@ -252,6 +252,7 @@ const RegisterModal = ({ isOpen, onClose }) => {
 function Homepage() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const features = [
     {

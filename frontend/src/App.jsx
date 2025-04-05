@@ -8,6 +8,9 @@ import SearchStocks from "./components/SearchStocks";
 import ZerodhaPortfolio from "./components/ZerodhaPortfolio";
 import StockComparison from "./components/StockComparison";
 import StockComparisonChart from "./components/StockComparisonChart";
+import AdvancedPaperTradingApp from "./components/PaperTrading";
+import Navbar from "./components/Navbar";
+import News from "./components/News";
 
 // Sample data for fallback purposes
 const sampleStockData = {
@@ -142,8 +145,10 @@ const Dashboard = () => {
   }, []);
 
   return (
+    <div>
+      <Navbar />
     <div className="p-4">
-      <Link to="/" className="text-blue-600 hover:underline mb-4 inline-block">
+      <Link to="/appdetails" className="text-blue-600 hover:underline mb-4 inline-block">
         ← Back to Home
       </Link>
       <h1 className="text-2xl font-bold mb-4">Angel One Portfolio Analysis</h1>
@@ -273,6 +278,7 @@ const Dashboard = () => {
         </>
       )}
     </div>
+    </div>
   );
 };
 
@@ -288,6 +294,8 @@ const App = () => {
           <Route path="/zerodha" element={<ZerodhaPortfolio />} />
           <Route path="/compare" element={<StockComparison />} />
           <Route path="/comparisonchart" element={<StockComparisonChart />} />
+          <Route path="/papertrading" element={<AdvancedPaperTradingApp />} />
+          <Route path="/news" element={<News />} />
         </Routes>
       </div>
     </Router>

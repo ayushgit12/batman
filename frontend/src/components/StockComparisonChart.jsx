@@ -37,13 +37,14 @@ const StockComparisonChart = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/get-time-series", {
+      const response = await fetch("http://127.0.0.1:5000/api/get-time-series", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ tickers: [ticker1, ticker2] }),
       });
+      
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);

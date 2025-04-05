@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle, Key, Lock, Fingerprint, Shield, ChevronRight } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import Navbar from './Navbar';
+import { useNavigate } from 'react-router-dom';
 
 const tradingApps = [
   {
@@ -188,6 +189,7 @@ const CredentialsModal = ({ app, isOpen, onClose }) => {
 
 function AppDetails() {
   const [selectedApp, setSelectedApp] = useState(null);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -221,7 +223,11 @@ function AppDetails() {
               </div>
               <div className="p-6 bg-white rounded-b-xl">
                 <button
-                  onClick={() => setSelectedApp(app)}
+                  onClick={() => {setSelectedApp(app)
+                    if(app.name == "Angel One")
+                         navigate("/dashboard")
+
+                  }}
                   className="w-full bg-gray-900 text-white py-2 px-4 rounded-md hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                 >
                   Configure

@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import HoldingsTable from "./components/HoldingsTable.tsx";
 
+import Navbar from "./Navbar.jsx";
+
 const Dashboard = () => {
   const [holdings, setHoldings] = useState({
     angelOne: [],
@@ -80,6 +82,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Top Stats Bar */}
+      <Navbar />
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
