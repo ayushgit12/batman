@@ -1,6 +1,6 @@
 import React, { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, PieChart, Brain, X, ChevronRight, LineChart, LogIn, UserPlus, Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import { TrendingUp, PieChart, Brain, X, ChevronRight, LineChart, LogIn, UserPlus, Github, Twitter, Linkedin, Mail, User, UserCheck } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -288,7 +288,7 @@ function Homepage() {
                 InvestSmart
               </span>
             </div>
-
+{!localStorage.getItem("token") && (
             <div className="flex items-center space-x-4">
               <button
                 className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-900"
@@ -305,6 +305,14 @@ function Homepage() {
                 Register
               </button>
             </div>
+)}
+{localStorage.getItem("token") && (
+            <div className="hidden md:flex items-center space-x-4">
+              <UserCheck className="w-5 h-5 text-gray-600" />
+              <span className="text-gray-600">Logged In</span>
+              </div>
+)}
+              
           </div>
         </div>
       </nav>

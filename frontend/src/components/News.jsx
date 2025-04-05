@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
+import Preloader from './Preloader';
 
 const News = () => {
   const [news, setNews] = useState([]);
@@ -30,14 +31,7 @@ const News = () => {
     fetchNews();
   }, []);
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f0f8ff' }}>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
+ 
   if (error) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f0f8ff' }}>
@@ -49,6 +43,8 @@ const News = () => {
   return (
      <div>
       <Navbar />
+
+      <Preloader onLoadingComplete={() => setLoading(false)} />
     <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px', backgroundColor: '#f0f8ff', color: '#333' }}>
       <h1 className='text-3xl font-bold' style={{ color: '#007bff', textAlign: 'center', marginBottom: '30px' }}>Latest Stock Market News</h1>
       {news.map((article, index) => (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, LogIn, UserPlus, LogOut, LayoutDashboard, BarChart3, Columns2, FileBarChart } from 'lucide-react';
+import { LineChart, LogIn, NewspaperIcon, UserPlus, LogOut, LayoutDashboard, BarChart3, Columns2, FileBarChart, IndianRupee } from 'lucide-react';
 
 const Navbar = ({ onLoginClick, onRegisterClick }) => {
 
@@ -21,6 +21,20 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
               >
                 <LayoutDashboard className="w-5 h-5 mr-1" />
                 Dashboard
+              </button>
+              <button
+                onClick={() => window.location.href = "/news"}
+                className="flex items-center text-gray-600 hover:text-gray-800 cursor-pointer"
+              >
+                <NewspaperIcon className="w-5 h-5 mr-1" />
+                Stock News
+              </button>
+              <button
+                onClick={() => window.location.href = "/buysell"}
+                className="flex items-center text-gray-600 hover:text-gray-800 cursor-pointer"
+              >
+                <IndianRupee className="w-5 h-5 mr-1" />
+                Buy/Sell
               </button>
               <button
                 onClick={() => window.location.href = "/compare"}

@@ -11,6 +11,8 @@ import StockComparisonChart from "./components/StockComparisonChart";
 import AdvancedPaperTradingApp from "./components/PaperTrading";
 import Navbar from "./components/Navbar";
 import News from "./components/News";
+import Upstox_Holdings from "./components/Upstox_Holdings";
+import BuySell from "./components/BuySell";
 
 // Sample data for fallback purposes
 const sampleStockData = {
@@ -296,6 +298,8 @@ const App = () => {
           <Route path="/comparisonchart" element={<StockComparisonChart />} />
           <Route path="/papertrading" element={<AdvancedPaperTradingApp />} />
           <Route path="/news" element={<News />} />
+          <Route path="/upstox_holdings" element={<Upstox_Holdings />} />
+          <Route path="/buysell" element={<BuySell />} />
         </Routes>
       </div>
     </Router>
