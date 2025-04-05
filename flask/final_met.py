@@ -10,6 +10,7 @@ import os
 load_dotenv()  # Load variables from .env file
 from flask_pymongo import PyMongo, MongoClient
 from flask_cors import CORS
+from bson import ObjectId
 
 
 api_key = os.getenv("API_KEY")
@@ -218,6 +219,36 @@ def login():
 def logout():
     session.clear()
     return jsonify({"message": "Logged out successfully"})
+
+
+# API endpoint to add to watchList
+@app.route('/api/addToWatchList', methods=['POST'])
+def add_to_watchlist():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    symbol = data.get('symbol')
+    # print(f"Adding {symbol} to watchlist for user {user_id}")
+
+    if not user_id or not symbol:
+        return jsonify({"error": "Please provide user_id and symbol"}), 400
+
+    # Check if the user exists
+    user_id_objectId = ObjectId(user_id)
+    user = teams_collection.find_one({'_id': user_id_objectId})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Add to watchlist
+    if symbol in user.get('watchlist', []):
+        return jsonify({"error": "Symbol already in watchlist"}), 409
+
+    teams_collection.update_one(
+        {'_id': user_id},
+        {'$addToSet': {'watchlist': symbol}}
+    )
+    # Check if the symbol is already in the watchlist
+
+    return jsonify({"message": "Added to watchlist successfully"})
 
 @app.route('/api/stocks')
 def get_stocks():

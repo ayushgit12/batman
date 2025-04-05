@@ -4,9 +4,15 @@ import { TrendingUp, PieChart, Brain, X, ChevronRight, LineChart, LogIn, UserPlu
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Preloader from './Preloader';
 
 const LoginModal = ({ isOpen, onClose }) => {
      const navigate = useNavigate();
+
+     if(isOpen && localStorage.getItem('token')){
+          navigate("/dashboard");
+     }
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -122,6 +128,12 @@ const LoginModal = ({ isOpen, onClose }) => {
 };
 
 const RegisterModal = ({ isOpen, onClose }) => {
+     const navigate = useNavigate();
+
+     if(isOpen && localStorage.getItem('token')){
+          navigate("/dashboard");
+     }
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -262,6 +274,8 @@ function Homepage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Toaster position="top-center" />
+      <Preloader onLoadingComplete={() => setLoading(false)} />
+      
       
       {/* Navigation */}
       <nav className="bg-white shadow-sm">
@@ -269,7 +283,7 @@ function Homepage() {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <LineChart className="w-8 h-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">
+              <span onClick={()=>window.location.href="/"} className="ml-2 cursor-pointer text-xl font-bold text-gray-900">
                 InvestSmart
               </span>
             </div>
@@ -307,7 +321,7 @@ function Homepage() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10"
+              className="flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 cursor-pointer"
               onClick={() => {
                 setShowRegisterModal(true);
                 toast.success("Let's get you started!");
@@ -466,7 +480,8 @@ function Homepage() {
       {/* Modals */}
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
       <RegisterModal isOpen={showRegisterModal} onClose={() => setShowRegisterModal(false)} />
-    </div>
+    </div> 
+     
   );
 }
 
