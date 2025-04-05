@@ -17,6 +17,9 @@ import pandas as pd
 import tqdm
 from flask import jsonify
 from flask import request
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
 stock_bp = Blueprint('stocks', __name__, url_prefix='/api')
@@ -160,253 +163,9 @@ def get_stocks():
         print(f"Error fetching stock data: {str(e)}")
         # Return an empty array, the frontend will use sample data
         return jsonify([])
+
     
 
-@stock_bp.route('/compare-stocks', methods=['POST'])
-def compare_stocks():
-    try:
-        # Get tickers from the request
-        data = request.get_json()
-        ticker1 = data.get('ticker1', '').upper()
-        ticker2 = data.get('ticker2', '').upper()
-        
-        if not ticker1 or not ticker2:
-            return jsonify({"error": "Please provide both ticker symbols"}), 400
-        
-        # Fetch data from yfinance
-        stock1_data = get_stock_data(ticker1)
-        stock2_data = get_stock_data(ticker2)
-        
-        # Compare the stocks
-        comparison_result = {
-            "ticker1": ticker1,
-            "ticker2": ticker2,
-            "stock1": stock1_data,
-            "stock2": stock2_data,
-            "analysis": generate_analysis(ticker1, ticker2, stock1_data, stock2_data)
-        }
-        
-        return jsonify(comparison_result)
-    
-    except Exception as e:
-        print(traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
-
-def get_stock_data(ticker):
-    """
-    Fetch comprehensive stock data from yfinance
-    """
-    try:
-        # Create Ticker object
-        stock = yf.Ticker(ticker)
-        
-        # Get basic info
-        info = stock.info
-        
-        # Get historical price data
-        hist = stock.history(period="1y")
-        
-        # Calculate additional metrics
-        current_price = info.get('currentPrice', info.get('regularMarketPrice', 0))
-        previous_close = info.get('previousClose', 0)
-        daily_change = ((current_price - previous_close) / previous_close * 100) if previous_close else 0
-        
-        # Extract key financial ratios
-        pe_ratio = info.get('trailingPE', info.get('forwardPE', 0))
-        pb_ratio = info.get('priceToBook', 0)
-        ps_ratio = info.get('priceToSalesTrailing12Months', 0)
-        dividend_yield = info.get('dividendYield', 0) * 100 if info.get('dividendYield') else 0
-        
-        # Get balance sheet data
-        try:
-            balance_sheet = stock.balance_sheet
-            
-            # Calculate current ratio if balance sheet data is available
-            if not balance_sheet.empty and 'Total Current Assets' in balance_sheet.index and 'Total Current Liabilities' in balance_sheet.index:
-                current_assets = balance_sheet.loc['Total Current Assets'].iloc[0]
-                current_liabilities = balance_sheet.loc['Total Current Liabilities'].iloc[0]
-                current_ratio = float(current_assets / current_liabilities) if current_liabilities else 0
-            else:
-                current_ratio = 0
-                
-            # Calculate debt-to-equity ratio
-            if not balance_sheet.empty and 'Total Debt' in balance_sheet.index and 'Total Stockholder Equity' in balance_sheet.index:
-                total_debt = balance_sheet.loc['Total Debt'].iloc[0] if 'Total Debt' in balance_sheet.index else 0
-                total_equity = balance_sheet.loc['Total Stockholder Equity'].iloc[0]
-                debt_to_equity = float(total_debt / total_equity) if total_equity else 0
-            else:
-                debt_to_equity = 0
-        except:
-            current_ratio = 0
-            debt_to_equity = 0
-        
-        # Get income statement data
-        try:
-            income_stmt = stock.income_stmt
-            
-            # Calculate profit margin
-            if not income_stmt.empty and 'Net Income' in income_stmt.index and 'Total Revenue' in income_stmt.index:
-                net_income = income_stmt.loc['Net Income'].iloc[0]
-                revenue = income_stmt.loc['Total Revenue'].iloc[0]
-                profit_margin = float(net_income / revenue * 100) if revenue else 0
-            else:
-                profit_margin = info.get('profitMargins', 0) * 100 if info.get('profitMargins') else 0
-                
-            # Calculate ROE
-            if not income_stmt.empty and not balance_sheet.empty and 'Net Income' in income_stmt.index and 'Total Stockholder Equity' in balance_sheet.index:
-                net_income = income_stmt.loc['Net Income'].iloc[0]
-                equity = balance_sheet.loc['Total Stockholder Equity'].iloc[0]
-                roe = float(net_income / equity * 100) if equity else 0
-            else:
-                roe = info.get('returnOnEquity', 0) * 100 if info.get('returnOnEquity') else 0
-        except:
-            profit_margin = info.get('profitMargins', 0) * 100 if info.get('profitMargins') else 0
-            roe = info.get('returnOnEquity', 0) * 100 if info.get('returnOnEquity') else 0
-        
-        # Create result dictionary
-        result = {
-            "ticker": ticker,
-            "company_name": info.get('shortName', ticker),
-            "sector": info.get('sector', 'N/A'),
-            "industry": info.get('industry', 'N/A'),
-            "market_cap": info.get('marketCap', 0),
-            "market_cap_fmt": format_market_cap(info.get('marketCap', 0)),
-            "current_price": current_price,
-            "daily_change": daily_change,
-            "fifty_two_week_high": info.get('fiftyTwoWeekHigh', 0),
-            "fifty_two_week_low": info.get('fiftyTwoWeekLow', 0),
-            
-            # Financial ratios
-            "pe_ratio": pe_ratio,
-            "pb_ratio": pb_ratio,
-            "ps_ratio": ps_ratio,
-            "dividend_yield": dividend_yield,
-            "peg_ratio": info.get('pegRatio', 0),
-            "current_ratio": current_ratio,
-            "debt_to_equity": debt_to_equity,
-            "profit_margin": profit_margin,
-            "return_on_equity": roe,
-            
-            # Growth metrics
-            "revenue_growth": info.get('revenueGrowth', 0) * 100 if info.get('revenueGrowth') else 0,
-            "earnings_growth": info.get('earningsGrowth', 0) * 100 if info.get('earningsGrowth') else 0,
-            "earnings_quarterly_growth": info.get('earningsQuarterlyGrowth', 0) * 100 if info.get('earningsQuarterlyGrowth') else 0,
-            
-            # Analyst opinions
-            "analyst_rating": info.get('recommendationKey', 'N/A'),
-            "target_price": info.get('targetMeanPrice', 0),
-            "target_upside": ((info.get('targetMeanPrice', 0) / current_price) - 1) * 100 if current_price else 0,
-            "analyst_count": info.get('numberOfAnalystOpinions', 0),
-            
-            # Additional data
-            "beta": info.get('beta', 0),
-            "trailing_eps": info.get('trailingEps', 0),
-            "forward_eps": info.get('forwardEps', 0),
-            "shares_outstanding": info.get('sharesOutstanding', 0),
-            "short_ratio": info.get('shortRatio', 0)
-        }
-        
-        return result
-    except Exception as e:
-        print(f"Error fetching data for {ticker}: {e}")
-        print(traceback.format_exc())
-        return {
-            "ticker": ticker,
-            "error": str(e),
-            "company_name": ticker,
-            "sector": "N/A",
-            "industry": "N/A"
-        }
-
-def generate_analysis(ticker1, ticker2, stock1_data, stock2_data):
-    """
-    Generate a detailed comparison analysis between two stocks
-    """
-    analysis = {}
-    
-    # Value comparison
-    analysis["value_comparison"] = {
-        "pe_winner": ticker1 if stock1_data.get("pe_ratio", 0) < stock2_data.get("pe_ratio", 0) and stock1_data.get("pe_ratio", 0) > 0 else ticker2,
-        "pb_winner": ticker1 if stock1_data.get("pb_ratio", 0) < stock2_data.get("pb_ratio", 0) and stock1_data.get("pb_ratio", 0) > 0 else ticker2,
-        "ps_winner": ticker1 if stock1_data.get("ps_ratio", 0) < stock2_data.get("ps_ratio", 0) and stock1_data.get("ps_ratio", 0) > 0 else ticker2,
-        "peg_winner": ticker1 if stock1_data.get("peg_ratio", 0) < stock2_data.get("peg_ratio", 0) and stock1_data.get("peg_ratio", 0) > 0 else ticker2,
-    }
-    
-    # Growth comparison
-    analysis["growth_comparison"] = {
-        "revenue_growth_winner": ticker1 if stock1_data.get("revenue_growth", 0) > stock2_data.get("revenue_growth", 0) else ticker2,
-        "earnings_growth_winner": ticker1 if stock1_data.get("earnings_growth", 0) > stock2_data.get("earnings_growth", 0) else ticker2,
-        "roe_winner": ticker1 if stock1_data.get("return_on_equity", 0) > stock2_data.get("return_on_equity", 0) else ticker2,
-    }
-    
-    # Financial health comparison
-    analysis["financial_health_comparison"] = {
-        "current_ratio_winner": ticker1 if stock1_data.get("current_ratio", 0) > stock2_data.get("current_ratio", 0) else ticker2,
-        "debt_to_equity_winner": ticker1 if stock1_data.get("debt_to_equity", 0) < stock2_data.get("debt_to_equity", 0) and stock1_data.get("debt_to_equity", 0) > 0 else ticker2,
-        "profit_margin_winner": ticker1 if stock1_data.get("profit_margin", 0) > stock2_data.get("profit_margin", 0) else ticker2,
-    }
-    
-    # Dividend comparison
-    analysis["dividend_comparison"] = {
-        "dividend_winner": ticker1 if stock1_data.get("dividend_yield", 0) > stock2_data.get("dividend_yield", 0) else ticker2,
-    }
-    
-    # Market sentiment comparison
-    analysis["market_sentiment"] = {
-        "analyst_rating_winner": determine_better_rating(stock1_data.get("analyst_rating", "N/A"), stock2_data.get("analyst_rating", "N/A"), ticker1, ticker2),
-        "target_upside_winner": ticker1 if stock1_data.get("target_upside", 0) > stock2_data.get("target_upside", 0) else ticker2,
-    }
-    
-    # Overall score
-    stock1_score = 0
-    stock2_score = 0
-    
-    # Count wins in each category
-    for category in analysis.values():
-        for winner in category.values():
-            if winner == ticker1:
-                stock1_score += 1
-            elif winner == ticker2:
-                stock2_score += 1
-    
-    analysis["overall_winner"] = ticker1 if stock1_score > stock2_score else ticker2
-    analysis["score"] = {
-        ticker1: stock1_score,
-        ticker2: stock2_score
-    }
-
-    return analysis
-
-def determine_better_rating(rating1, rating2, ticker1, ticker2):
-    """
-    Determine which stock has a better analyst rating
-    """
-    rating_rank = {
-        "strongBuy": 5,
-        "buy": 4,
-        "hold": 3,
-        "underperform": 2,
-        "sell": 1,
-        "N/A": 0
-    }
-    
-    rank1 = rating_rank.get(rating1, 0)
-    rank2 = rating_rank.get(rating2, 0)
-    
-    return ticker1 if rank1 > rank2 else ticker2
-
-def format_market_cap(market_cap):
-    """
-    Format market cap in billions or millions
-    """
-    if market_cap >= 1e12:
-        return f"${market_cap / 1e12:.2f}T"
-    elif market_cap >= 1e9:
-        return f"${market_cap / 1e9:.2f}B"
-    elif market_cap >= 1e6:
-        return f"${market_cap / 1e6:.2f}M"
-    else:
-        return f"${market_cap:,.0f}"
 
 
 
@@ -710,3 +469,631 @@ def get_time_series():
     result = get_stock_predictions(tickers)
     # print(result)
     return jsonify(result)
+
+
+
+def analyze_investor_behavior(holdings_data):
+    """
+    Analyzes investor behavior based on their stock holdings.
+    Returns a summary of sector allocation, market cap distribution, risk profile, and other insights.
+    
+    Parameters:
+    holdings_data (list): List of dictionaries containing stock metrics and holding information
+    """
+    if not holdings_data:
+        return {
+            "summary": "No holdings data available to analyze investor behavior."
+        }
+    
+    # Calculate total portfolio value
+    total_invested = sum(holding.get('Invested Value', 0) for holding in holdings_data)
+    total_current_value = sum(holding.get('Current Value', 0) for holding in holdings_data)
+    
+    # Analyze sector distribution
+    sectors = {}
+    for holding in holdings_data:
+        sector = holding.get('Sector', 'Unknown')
+        if sector not in sectors:
+            sectors[sector] = 0
+        sectors[sector] += holding.get('Current Value', 0)
+    
+    # Calculate sector percentages
+    sector_percentages = {sector: (value / total_current_value * 100) for sector, value in sectors.items() if total_current_value > 0}
+    
+    # Identify dominant sectors (>15%)
+    dominant_sectors = {sector: pct for sector, pct in sector_percentages.items() if pct > 15}
+    
+    # Analyze market cap distribution
+    large_cap = 0
+    mid_cap = 0
+    small_cap = 0
+    
+    for holding in holdings_data:
+        market_cap = holding.get('Market Cap', 0)
+        current_value = holding.get('Current Value', 0)
+        
+        # Define market cap categories (adjust thresholds as needed)
+        if market_cap > 200000000000:  # 20,000 crores for large cap
+            large_cap += current_value
+        elif market_cap > 50000000000:  # 5,000 crores for mid cap
+            mid_cap += current_value
+        else:
+            small_cap += current_value
+    
+    # Calculate market cap percentages
+    if total_current_value > 0:
+        large_cap_pct = (large_cap / total_current_value) * 100
+        mid_cap_pct = (mid_cap / total_current_value) * 100
+        small_cap_pct = (small_cap / total_current_value) * 100
+    else:
+        large_cap_pct = mid_cap_pct = small_cap_pct = 0
+    
+    # Analyze stock concentration
+    num_stocks = len(holdings_data)
+    avg_investment = total_invested / num_stocks if num_stocks > 0 else 0
+    
+    # Find highest value holding
+    highest_holding = max(holdings_data, key=lambda x: x.get('Current Value', 0)) if holdings_data else {}
+    highest_holding_pct = (highest_holding.get('Current Value', 0) / total_current_value * 100) if total_current_value > 0 else 0
+    
+    # Analyze risk profile
+    high_beta_stocks = [holding for holding in holdings_data if holding.get('Beta', 0) and holding.get('Beta', 0) > 1.2]
+    high_beta_value = sum(holding.get('Current Value', 0) for holding in high_beta_stocks)
+    high_beta_pct = (high_beta_value / total_current_value * 100) if total_current_value > 0 else 0
+    
+    # Calculate portfolio beta (weighted average)
+    weighted_beta = 0
+    for holding in holdings_data:
+        if holding.get('Beta') and holding.get('Current Value'):
+            weighted_beta += holding.get('Beta', 0) * (holding.get('Current Value', 0) / total_current_value) if total_current_value > 0 else 0
+    
+    # Calculate dividend focus
+    dividend_stocks = [holding for holding in holdings_data if holding.get('Dividend Yield', 0) and holding.get('Dividend Yield', 0) > 0.02]  # >2% yield
+    dividend_value = sum(holding.get('Current Value', 0) for holding in dividend_stocks)
+    dividend_pct = (dividend_value / total_current_value * 100) if total_current_value > 0 else 0
+    
+    # Calculate growth vs value orientation
+    growth_stocks = [h for h in holdings_data if h.get('P/E Ratio', 0) and h.get('P/E Ratio', 0) > 25]
+    value_stocks = [h for h in holdings_data if h.get('P/E Ratio', 0) and h.get('P/E Ratio', 0) < 15 and h.get('P/E Ratio', 0) > 0]
+    
+    growth_value = sum(h.get('Current Value', 0) for h in growth_stocks)
+    value_stock_value = sum(h.get('Current Value', 0) for h in value_stocks)
+    
+    growth_pct = (growth_value / total_current_value * 100) if total_current_value > 0 else 0
+    value_pct = (value_stock_value / total_current_value * 100) if total_current_value > 0 else 0
+    
+    # Overall profit/loss
+    overall_pnl = total_current_value - total_invested
+    overall_pnl_pct = (overall_pnl / total_invested * 100) if total_invested > 0 else 0
+    
+    # Determine investor style and risk profile
+    investor_style = ""
+    risk_profile = ""
+    
+    # Determine style based on metrics
+    if growth_pct > 50:
+        investor_style = "Growth Investor"
+    elif value_pct > 50:
+        investor_style = "Value Investor"
+    elif dividend_pct > 40:
+        investor_style = "Income Investor"
+    else:
+        investor_style = "Balanced Investor"
+    
+    # Determine risk profile
+    if small_cap_pct > 40 or high_beta_pct > 50:
+        risk_profile = "Aggressive"
+    elif large_cap_pct > 60 and high_beta_pct < 30:
+        risk_profile = "Conservative"
+    else:
+        risk_profile = "Moderate"
+    
+    # Create the behavior analysis summary with emojis
+    summary = f"""
+🔍 Portfolio Overview:
+
+🏦 You've invested in {num_stocks} stocks across {len(sectors)} different sectors.
+💰 Your top sector is {max(sector_percentages.items(), key=lambda x: x[1])[0]} at {max(sector_percentages.items(), key=lambda x: x[1])[1]:.1f}% of your portfolio.
+
+📊 Market Cap Breakdown:
+• 🏢 Large Caps: {large_cap_pct:.1f}%
+• 🏠 Mid Caps: {mid_cap_pct:.1f}%
+• 🏡 Small Caps: {small_cap_pct:.1f}%
+
+🧠 Your Investing Style:
+• 🔮 You seem to be a {investor_style} with a {risk_profile} risk appetite.
+• {"🚀 You're taking some risks! " if risk_profile == "Aggressive" else "🛡️ You prefer safer investments. " if risk_profile == "Conservative" else "⚖️ You balance risk and safety. "}
+• {"📈 You favor high-growth companies. " if growth_pct > 40 else "💎 You seek undervalued companies. " if value_pct > 40 else ""}
+• {"💵 You have a strong focus on dividend income. " if dividend_pct > 30 else ""}
+
+⚠️ Risk Analysis:
+• 📉 {high_beta_pct:.1f}% of your portfolio is in high-volatility stocks.
+• 🌡️ Your portfolio's overall risk level (beta) is {weighted_beta:.2f} {" - higher than market" if weighted_beta > 1 else " - lower than market" if weighted_beta < 1 else "- same as market"}.
+
+🔎 Diversification:
+• {"👍 Well diversified across sectors" if len(dominant_sectors) >= 3 else "⚠️ Somewhat concentrated in a few sectors"}
+• {"⚠️ Your biggest holding makes up {highest_holding_pct:.1f}% of your portfolio." if highest_holding_pct > 20 else ""}
+
+💪 Strengths:
+• {"✅ Good sector diversification" if len(sectors) > 4 else ""}
+• {"✅ Balanced across market caps" if all(x > 20 for x in [large_cap_pct, mid_cap_pct, small_cap_pct]) else ""}
+• {"✅ Strong dividend focus" if dividend_pct > 30 else ""}
+
+🚩 Areas to Consider:
+• {"⚠️ High concentration in top holdings" if highest_holding_pct > 25 else ""}
+• {"⚠️ Limited sector diversification" if len(sectors) < 4 else ""}
+• {"⚠️ Heavy tilt toward small caps" if small_cap_pct > 50 else ""}
+• {"⚠️ High overall portfolio risk" if weighted_beta > 1.3 else ""}
+"""
+    
+    # Return the analysis results
+    return {
+        "summary": summary,
+        "sector_allocation": sector_percentages,
+        "market_cap_distribution": {
+            "large_cap": large_cap_pct,
+            "mid_cap": mid_cap_pct,
+            "small_cap": small_cap_pct
+        },
+        "investor_style": investor_style,
+        "risk_profile": risk_profile,
+        "metrics": {
+            "portfolio_beta": weighted_beta,
+            "high_beta_percentage": high_beta_pct,
+            "dividend_focus": dividend_pct,
+            "growth_orientation": growth_pct,
+            "value_orientation": value_pct,
+            "overall_pnl_percentage": overall_pnl_pct
+        }
+    }
+
+@stock_bp.route('/investor-behavior')
+def get_investor_behavior():
+    """
+    API endpoint that returns an analysis of investor behavior based on holdings
+    """
+    try:
+        # Get detailed holdings data from the API
+        holdings_response = smart_api.holding()
+        holdings_data = []
+        
+        if holdings_response['status']:
+            # Process each holding
+            for holding in holdings_response['data']:
+                angel_symbol = holding['tradingsymbol']
+                metrics = fetch_financial_metrics(angel_symbol, holding)
+                holdings_data.append(metrics)
+            
+        
+            # Analyze investor behavior
+            behavior_analysis = analyze_investor_behavior(holdings_data)
+            return jsonify(behavior_analysis)
+        else:
+            print(f"Error fetching holdings: {holdings_response['message']}")
+            return jsonify({"error": "Unable to fetch holdings data"})
+    except Exception as e:
+        # Log the error
+        print(f"Error analyzing investor behavior: {str(e)}")
+        return jsonify({"error": "Error analyzing investor behavior", "message": str(e)})
+    
+
+def convert_numpy_types(obj):
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, pd.Timestamp):
+        return obj.isoformat() # Return as ISO string
+    elif isinstance(obj, (np.datetime64, np.timedelta64)):
+        # Handle numpy datetime/timedelta if necessary, converting to ISO string or seconds
+         return str(obj)
+    elif pd.isna(obj):
+        return None # Convert Pandas NaN/NaT to None (JSON null)
+    return obj
+
+# Helper function to safely get info data
+def get_safe_info(ticker_info, key, default=None):
+     val = ticker_info.get(key, default)
+     # Further clean specific problematic values if needed
+     if isinstance(val, (float, np.floating)) and (np.isnan(val) or np.isinf(val)):
+         return default
+     if pd.isna(val):
+         return default
+     return convert_numpy_types(val)
+
+@stock_bp.route('/stock/<ticker_symbol>', methods=['GET'])
+def get_stock_data(ticker_symbol):
+    """
+    Fetches historical data and fundamental info for a given stock ticker.
+    Accepts 'interval' and 'period' query parameters.
+    """
+
+
+    if not ticker_symbol:
+        return jsonify({"error": "Ticker symbol is required"}), 400
+
+    interval = request.args.get('interval', '1d') # Default to daily
+    period = request.args.get('period', 'max')     # Default to max
+
+    # Validate inputs (basic example)
+    allowed_intervals = ['1d', '1h', '5m', '15m', '30m', '90m'] # Add more as needed by yfinance/frontend
+    allowed_periods = ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max']
+
+    if interval not in allowed_intervals:
+        return jsonify({"error": f"Invalid interval. Allowed: {', '.join(allowed_intervals)}"}), 400
+    if period not in allowed_periods:
+         return jsonify({"error": f"Invalid period. Allowed: {', '.join(allowed_periods)}"}), 400
+
+    # --- Important yfinance constraints ---
+    # Hourly data typically limited to last 730 days (2y)
+    # Minute data typically limited to last 7 days (for >1d period) or 60 days (intraday)
+    if interval != '1d' and period == 'max':
+        logging.warning(f"Max period requested for non-daily interval ({interval}). Defaulting period to '2y'.")
+        period = '2y' # Adjust max period for hourly/minute data if needed
+    if interval != '1d' and period == '10y':
+        logging.warning(f"10y period requested for non-daily interval ({interval}). Defaulting period to '2y'.")
+        period = '2y'
+    if interval != '1d' and period == '5y':
+         logging.warning(f"5y period requested for non-daily interval ({interval}). Defaulting period to '2y'.")
+         period = '2y'
+
+
+    logging.info(f"Fetching data for {ticker_symbol}, Interval: {interval}, Period: {period}")
+
+    try:
+        ticker = yf.Ticker(ticker_symbol)
+
+        # 1. Get Historical Data
+        # Use repair=True to attempt fixing some data issues
+        history_df = ticker.history(period=period, interval=interval, repair=True)
+
+        if history_df.empty:
+             # Check if ticker exists but has no data for this period/interval
+             try:
+                 # Attempt to get basic info to see if ticker is valid at all
+                 _ = ticker.info.get('symbol')
+                 logging.warning(f"No historical data found for {ticker_symbol} with period={period}, interval={interval}")
+                 return jsonify({
+                     "error": f"No historical data found for {ticker_symbol} for the selected period/interval.",
+                     "info": None, # Provide info if possible, even if history fails? Maybe not.
+                     "history": []
+                     }), 404 # Or 200 with empty data? 404 seems reasonable if primary data missing.
+             except Exception as info_err:
+                  logging.error(f"Ticker {ticker_symbol} seems invalid or yfinance error: {info_err}")
+                  return jsonify({"error": f"Invalid ticker symbol or data not available: {ticker_symbol}"}), 404
+
+
+        # Prepare history data for JSON and charting
+        history_df = history_df.reset_index() # Make Datetime index a column
+
+        # Ensure correct column names (lowercase for consistency)
+        history_df.columns = [col.lower().replace(' ', '_').replace('datetime', 'date') for col in history_df.columns]
+
+        # Convert date to ISO format string (better for cross-language compatibility)
+        # Make sure the column name is 'date' after lowercasing
+        date_col_name = 'date' # Adjust if your lowercasing changes 'Datetime' or 'Date' differently
+        if date_col_name not in history_df.columns:
+             # Try common alternatives if renaming failed unexpectedly
+             potential_date_cols = ['timestamp', 'index']
+             for col in potential_date_cols:
+                 if col in history_df.columns:
+                     date_col_name = col
+                     break
+             else:
+                 return jsonify({"error": "Could not find date column in historical data."}), 500
+
+
+        history_df[date_col_name] = history_df[date_col_name].apply(lambda d: d.isoformat())
+
+        # Select and rename columns for the chart
+        history_df = history_df[[date_col_name, 'open', 'high', 'low', 'close', 'volume']]
+        # Replace potential NaN/Infinity values with None before conversion
+        history_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+        history_data = history_df.where(pd.notnull(history_df), None).to_dict('records') # Convert NaN to None
+
+
+        # 2. Get Fundamental Info
+        ticker_info = ticker.info
+
+        # Select and clean relevant fundamental data
+        # Choose metrics you want to display - consult yfinance docs/ticker.info output
+        fundamentals = {
+            'symbol': get_safe_info(ticker_info, 'symbol'),
+            'longName': get_safe_info(ticker_info, 'longName'),
+            'sector': get_safe_info(ticker_info, 'sector'),
+            'industry': get_safe_info(ticker_info, 'industry'),
+            'country': get_safe_info(ticker_info, 'country'),
+            'website': get_safe_info(ticker_info, 'website'),
+            'longBusinessSummary': get_safe_info(ticker_info, 'longBusinessSummary'),
+            'marketCap': get_safe_info(ticker_info, 'marketCap'),
+            'trailingPE': get_safe_info(ticker_info, 'trailingPE'),
+            'forwardPE': get_safe_info(ticker_info, 'forwardPE'),
+            'dividendYield': get_safe_info(ticker_info, 'dividendYield'),
+            'payoutRatio': get_safe_info(ticker_info, 'payoutRatio'),
+            'beta': get_safe_info(ticker_info, 'beta'),
+            'priceToBook': get_safe_info(ticker_info, 'priceToBook'),
+            'enterpriseValue': get_safe_info(ticker_info, 'enterpriseValue'),
+            'enterpriseToRevenue': get_safe_info(ticker_info, 'enterpriseToRevenue'),
+            'enterpriseToEbitda': get_safe_info(ticker_info, 'enterpriseToEbitda'),
+            'profitMargins': get_safe_info(ticker_info, 'profitMargins'),
+            'grossMargins': get_safe_info(ticker_info, 'grossMargins'),
+            'operatingMargins': get_safe_info(ticker_info, 'operatingMargins'),
+            'revenueGrowth': get_safe_info(ticker_info, 'revenueGrowth'),
+            'earningsGrowth': get_safe_info(ticker_info, 'earningsGrowth'), # Often quarterly, check key 'earningsQuarterlyGrowth' if needed
+            'totalRevenue': get_safe_info(ticker_info, 'totalRevenue'),
+            'revenuePerShare': get_safe_info(ticker_info, 'revenuePerShare'),
+            'returnOnAssets': get_safe_info(ticker_info, 'returnOnAssets'),
+            'returnOnEquity': get_safe_info(ticker_info, 'returnOnEquity'),
+            'totalCash': get_safe_info(ticker_info, 'totalCash'),
+            'totalDebt': get_safe_info(ticker_info, 'totalDebt'),
+            'totalCashPerShare': get_safe_info(ticker_info, 'totalCashPerShare'),
+            'bookValue': get_safe_info(ticker_info, 'bookValue'), # Per share
+            'fiftyTwoWeekHigh': get_safe_info(ticker_info, 'fiftyTwoWeekHigh'),
+            'fiftyTwoWeekLow': get_safe_info(ticker_info, 'fiftyTwoWeekLow'),
+            'averageVolume': get_safe_info(ticker_info, 'averageVolume'),
+            'currentPrice': get_safe_info(ticker_info, 'currentPrice') or get_safe_info(ticker_info, 'previousClose'), # Add current/previous close
+             # Add more fields as desired... consult ticker.info keys for your test tickers
+        }
+
+
+        logging.info(f"Successfully fetched data for {ticker_symbol}")
+        return jsonify({
+            "info": fundamentals,
+            "history": history_data
+        })
+
+    except Exception as e:
+        logging.error(f"Error fetching data for {ticker_symbol}: {e}", exc_info=True)
+        # Check if it's likely an invalid ticker error from yfinance (needs inspection of specific exceptions)
+        # For now, return a generic server error.
+        return jsonify({"error": f"Failed to fetch data for {ticker_symbol}. Check ticker or try again later."}), 500
+
+
+
+@stock_bp.route('/compare-stocks', methods=['POST'])
+def compare_stocks():
+    try:
+        # Get tickers from the request
+        data = request.get_json()
+        ticker1 = data.get('ticker1', '').upper()
+        ticker2 = data.get('ticker2', '').upper()
+        
+        if not ticker1 or not ticker2:
+            return jsonify({"error": "Please provide both ticker symbols"}), 400
+        
+        # Fetch data from yfinance
+        stock1_data = get_stock_data(ticker1)
+        stock2_data = get_stock_data(ticker2)
+        
+        # Compare the stocks
+        comparison_result = {
+            "ticker1": ticker1,
+            "ticker2": ticker2,
+            "stock1": stock1_data,
+            "stock2": stock2_data,
+            "analysis": generate_analysis(ticker1, ticker2, stock1_data, stock2_data)
+        }
+        
+        return jsonify(comparison_result)
+    
+    except Exception as e:
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+def get_stock_data(ticker):
+    """
+    Fetch comprehensive stock data from yfinance
+    """
+    try:
+        # Create Ticker object
+        stock = yf.Ticker(ticker)
+        
+        # Get basic info
+        info = stock.info
+        
+        # Get historical price data
+        hist = stock.history(period="1y")
+        
+        # Calculate additional metrics
+        current_price = info.get('currentPrice', info.get('regularMarketPrice', 0))
+        previous_close = info.get('previousClose', 0)
+        daily_change = ((current_price - previous_close) / previous_close * 100) if previous_close else 0
+        
+        # Extract key financial ratios
+        pe_ratio = info.get('trailingPE', info.get('forwardPE', 0))
+        pb_ratio = info.get('priceToBook', 0)
+        ps_ratio = info.get('priceToSalesTrailing12Months', 0)
+        dividend_yield = info.get('dividendYield', 0) * 100 if info.get('dividendYield') else 0
+        
+        # Get balance sheet data
+        try:
+            balance_sheet = stock.balance_sheet
+            
+            # Calculate current ratio if balance sheet data is available
+            if not balance_sheet.empty and 'Total Current Assets' in balance_sheet.index and 'Total Current Liabilities' in balance_sheet.index:
+                current_assets = balance_sheet.loc['Total Current Assets'].iloc[0]
+                current_liabilities = balance_sheet.loc['Total Current Liabilities'].iloc[0]
+                current_ratio = float(current_assets / current_liabilities) if current_liabilities else 0
+            else:
+                current_ratio = 0
+                
+            # Calculate debt-to-equity ratio
+            if not balance_sheet.empty and 'Total Debt' in balance_sheet.index and 'Total Stockholder Equity' in balance_sheet.index:
+                total_debt = balance_sheet.loc['Total Debt'].iloc[0] if 'Total Debt' in balance_sheet.index else 0
+                total_equity = balance_sheet.loc['Total Stockholder Equity'].iloc[0]
+                debt_to_equity = float(total_debt / total_equity) if total_equity else 0
+            else:
+                debt_to_equity = 0
+        except:
+            current_ratio = 0
+            debt_to_equity = 0
+        
+        # Get income statement data
+        try:
+            income_stmt = stock.income_stmt
+            
+            # Calculate profit margin
+            if not income_stmt.empty and 'Net Income' in income_stmt.index and 'Total Revenue' in income_stmt.index:
+                net_income = income_stmt.loc['Net Income'].iloc[0]
+                revenue = income_stmt.loc['Total Revenue'].iloc[0]
+                profit_margin = float(net_income / revenue * 100) if revenue else 0
+            else:
+                profit_margin = info.get('profitMargins', 0) * 100 if info.get('profitMargins') else 0
+                
+            # Calculate ROE
+            if not income_stmt.empty and not balance_sheet.empty and 'Net Income' in income_stmt.index and 'Total Stockholder Equity' in balance_sheet.index:
+                net_income = income_stmt.loc['Net Income'].iloc[0]
+                equity = balance_sheet.loc['Total Stockholder Equity'].iloc[0]
+                roe = float(net_income / equity * 100) if equity else 0
+            else:
+                roe = info.get('returnOnEquity', 0) * 100 if info.get('returnOnEquity') else 0
+        except:
+            profit_margin = info.get('profitMargins', 0) * 100 if info.get('profitMargins') else 0
+            roe = info.get('returnOnEquity', 0) * 100 if info.get('returnOnEquity') else 0
+        
+        # Create result dictionary
+        result = {
+            "ticker": ticker,
+            "company_name": info.get('shortName', ticker),
+            "sector": info.get('sector', 'N/A'),
+            "industry": info.get('industry', 'N/A'),
+            "market_cap": info.get('marketCap', 0),
+            "market_cap_fmt": format_market_cap(info.get('marketCap', 0)),
+            "current_price": current_price,
+            "daily_change": daily_change,
+            "fifty_two_week_high": info.get('fiftyTwoWeekHigh', 0),
+            "fifty_two_week_low": info.get('fiftyTwoWeekLow', 0),
+            
+            # Financial ratios
+            "pe_ratio": pe_ratio,
+            "pb_ratio": pb_ratio,
+            "ps_ratio": ps_ratio,
+            "dividend_yield": dividend_yield,
+            "peg_ratio": info.get('pegRatio', 0),
+            "current_ratio": current_ratio,
+            "debt_to_equity": debt_to_equity,
+            "profit_margin": profit_margin,
+            "return_on_equity": roe,
+            
+            # Growth metrics
+            "revenue_growth": info.get('revenueGrowth', 0) * 100 if info.get('revenueGrowth') else 0,
+            "earnings_growth": info.get('earningsGrowth', 0) * 100 if info.get('earningsGrowth') else 0,
+            "earnings_quarterly_growth": info.get('earningsQuarterlyGrowth', 0) * 100 if info.get('earningsQuarterlyGrowth') else 0,
+            
+            # Analyst opinions
+            "analyst_rating": info.get('recommendationKey', 'N/A'),
+            "target_price": info.get('targetMeanPrice', 0),
+            "target_upside": ((info.get('targetMeanPrice', 0) / current_price) - 1) * 100 if current_price else 0,
+            "analyst_count": info.get('numberOfAnalystOpinions', 0),
+            
+            # Additional data
+            "beta": info.get('beta', 0),
+            "trailing_eps": info.get('trailingEps', 0),
+            "forward_eps": info.get('forwardEps', 0),
+            "shares_outstanding": info.get('sharesOutstanding', 0),
+            "short_ratio": info.get('shortRatio', 0)
+        }
+        
+        return result
+    except Exception as e:
+        print(f"Error fetching data for {ticker}: {e}")
+        print(traceback.format_exc())
+        return {
+            "ticker": ticker,
+            "error": str(e),
+            "company_name": ticker,
+            "sector": "N/A",
+            "industry": "N/A"
+        }
+
+def generate_analysis(ticker1, ticker2, stock1_data, stock2_data):
+    """
+    Generate a detailed comparison analysis between two stocks
+    """
+    analysis = {}
+    
+    # Value comparison
+    analysis["value_comparison"] = {
+        "pe_winner": ticker1 if stock1_data.get("pe_ratio", 0) < stock2_data.get("pe_ratio", 0) and stock1_data.get("pe_ratio", 0) > 0 else ticker2,
+        "pb_winner": ticker1 if stock1_data.get("pb_ratio", 0) < stock2_data.get("pb_ratio", 0) and stock1_data.get("pb_ratio", 0) > 0 else ticker2,
+        "ps_winner": ticker1 if stock1_data.get("ps_ratio", 0) < stock2_data.get("ps_ratio", 0) and stock1_data.get("ps_ratio", 0) > 0 else ticker2,
+        "peg_winner": ticker1 if stock1_data.get("peg_ratio", 0) < stock2_data.get("peg_ratio", 0) and stock1_data.get("peg_ratio", 0) > 0 else ticker2,
+    }
+    
+    # Growth comparison
+    analysis["growth_comparison"] = {
+        "revenue_growth_winner": ticker1 if stock1_data.get("revenue_growth", 0) > stock2_data.get("revenue_growth", 0) else ticker2,
+        "earnings_growth_winner": ticker1 if stock1_data.get("earnings_growth", 0) > stock2_data.get("earnings_growth", 0) else ticker2,
+        "roe_winner": ticker1 if stock1_data.get("return_on_equity", 0) > stock2_data.get("return_on_equity", 0) else ticker2,
+    }
+    
+    # Financial health comparison
+    analysis["financial_health_comparison"] = {
+        "current_ratio_winner": ticker1 if stock1_data.get("current_ratio", 0) > stock2_data.get("current_ratio", 0) else ticker2,
+        "debt_to_equity_winner": ticker1 if stock1_data.get("debt_to_equity", 0) < stock2_data.get("debt_to_equity", 0) and stock1_data.get("debt_to_equity", 0) > 0 else ticker2,
+        "profit_margin_winner": ticker1 if stock1_data.get("profit_margin", 0) > stock2_data.get("profit_margin", 0) else ticker2,
+    }
+    
+    # Dividend comparison
+    analysis["dividend_comparison"] = {
+        "dividend_winner": ticker1 if stock1_data.get("dividend_yield", 0) > stock2_data.get("dividend_yield", 0) else ticker2,
+    }
+    
+    # Market sentiment comparison
+    analysis["market_sentiment"] = {
+        "analyst_rating_winner": determine_better_rating(stock1_data.get("analyst_rating", "N/A"), stock2_data.get("analyst_rating", "N/A"), ticker1, ticker2),
+        "target_upside_winner": ticker1 if stock1_data.get("target_upside", 0) > stock2_data.get("target_upside", 0) else ticker2,
+    }
+    
+    # Overall score
+    stock1_score = 0
+    stock2_score = 0
+    
+    # Count wins in each category
+    for category in analysis.values():
+        for winner in category.values():
+            if winner == ticker1:
+                stock1_score += 1
+            elif winner == ticker2:
+                stock2_score += 1
+    
+    analysis["overall_winner"] = ticker1 if stock1_score > stock2_score else ticker2
+    analysis["score"] = {
+        ticker1: stock1_score,
+        ticker2: stock2_score
+    }
+    
+    return analysis
+
+def determine_better_rating(rating1, rating2, ticker1, ticker2):
+    """
+    Determine which stock has a better analyst rating
+    """
+    rating_rank = {
+        "strongBuy": 5,
+        "buy": 4,
+        "hold": 3,
+        "underperform": 2,
+        "sell": 1,
+        "N/A": 0
+    }
+    
+    rank1 = rating_rank.get(rating1, 0)
+    rank2 = rating_rank.get(rating2, 0)
+    
+    return ticker1 if rank1 > rank2 else ticker2
+
+def format_market_cap(market_cap):
+    """
+    Format market cap in billions or millions
+    """
+    if market_cap >= 1e12:
+        return f"${market_cap / 1e12:.2f}T"
+    elif market_cap >= 1e9:
+        return f"${market_cap / 1e9:.2f}B"
+    elif market_cap >= 1e6:
+        return f"${market_cap / 1e6:.2f}M"
+    else:
+        return f"${market_cap:,.0f}"

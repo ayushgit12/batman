@@ -1,19 +1,34 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, BarChart, TrendingUp, ShoppingCart } from 'lucide-react';
 import { Key, Shield, Lock, Fingerprint, AlertTriangle } from 'lucide-react';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
-import {toast, Toaster} from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 
 const BuySell = () => {
+  const navbarRef = useRef(null);
+
   const handleAppSelect = (app) => {
-    // Handle app selection logic
     toast.dismiss();
     toast.error("Market is currently closed. Trading will resume during regular market hours.");
   };
-  
+
+  const handleClickOutsideNavbar = (e) => {
+    if (navbarRef.current && !navbarRef.current.contains(e.target)) {
+      toast.dismiss();
+      toast.error("Market is currently closed. Trading will resume during regular market hours.");
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('click', handleClickOutsideNavbar);
+    return () => {
+      window.removeEventListener('click', handleClickOutsideNavbar);
+    };
+  }, []);
+
   const tradingApps = [
     {
       id: 'zerodha',
@@ -48,17 +63,17 @@ const BuySell = () => {
       warning: 'API access requires enabling API features from your Fyers account settings.',
     },
   ];
-   
+
   return (
     <div>
-     <Toaster
-      />
-      {/* Navbar remains unchanged */}
-      <Navbar />
-     
-      {/* Main content with blur and gray overlay */}
+      <Toaster />
+      
+      {/* Navbar with ref */}
+      <div ref={navbarRef}>
+        <Navbar />
+      </div>
+
       <div className="relative">
-        {/* Blurred overlay for the entire content except navbar */}
         <div className="absolute inset-0 bg-gray-200 bg-opacity-80 backdrop-blur-xl pointer-events-none" />
         
         <motion.div
@@ -71,7 +86,7 @@ const BuySell = () => {
               <AlertTriangle className="text-amber-500 w-6 h-6 flex-shrink-0" />
               <p className="text-amber-800 font-medium">Market is currently closed. Trading will resume during regular market hours.</p>
             </div>
-            
+
             <div className="text-center mb-12">
               <h1 className="text-3xl font-bold text-gray-700 pt-4 sm:text-4xl">
                 Buy/Sell Stocks with Ease

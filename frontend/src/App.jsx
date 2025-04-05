@@ -13,6 +13,8 @@ import Navbar from "./components/Navbar";
 import News from "./components/News";
 import Upstox_Holdings from "./components/Upstox_Holdings";
 import BuySell from "./components/BuySell";
+import InvestorBehaviorDashboard from "./components/Behaviour";
+import StockAnalysisPage from "./components/StockAnalysis";
 
 // Sample data for fallback purposes
 const sampleStockData = {
@@ -300,6 +302,8 @@ const App = () => {
           <Route path="/news" element={<News />} />
           <Route path="/upstox_holdings" element={<Upstox_Holdings />} />
           <Route path="/buysell" element={<BuySell />} />
+          <Route path="/investor_behavior" element={<InvestorBehaviorDashboard />} />
+          <Route path="/stockanalysis" element={<StockAnalysisPage />} />
         </Routes>
       </div>
     </Router>

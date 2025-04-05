@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -12,7 +12,6 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import Navbar from "./Navbar";
 
 const StockComparison = () => {
   const [ticker1, setTicker1] = useState("AAPL");
@@ -21,11 +20,6 @@ const StockComparison = () => {
   const [error, setError] = useState(null);
   const [comparisonData, setComparisonData] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
-
-
-  useEffect(()=>{
-     console.log(comparisonData)
-  });
 
   const fetchComparisonData = async () => {
     if (!ticker1 || !ticker2) {
@@ -205,12 +199,8 @@ const StockComparison = () => {
   }
 
   return (
-
-<div>
-     <Navbar />
     <div className="container mx-auto p-4 max-w-6xl">
-
-      <h1 className="text-2xl font-bold mb-6 mt-4 text-center">
+      <h1 className="text-2xl font-bold mb-6 text-center">
         Stock Fundamental Comparison
       </h1>
 
@@ -673,7 +663,6 @@ const StockComparison = () => {
           </div>
         </div>
       )}
-    </div>
     </div>
   );
 };
