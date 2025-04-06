@@ -5,7 +5,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Preloader from './Preloader';
-
+import reg from '../assets/reg.jpg';
 const LoginModal = ({ isOpen, onClose }) => {
      const navigate = useNavigate();
 
@@ -89,6 +89,7 @@ const LoginModal = ({ isOpen, onClose }) => {
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
+            <img src={reg} alt="" className='h-72 mx-auto' />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -199,6 +200,7 @@ const RegisterModal = ({ isOpen, onClose }) => {
             </div>
 
             <form onSubmit={handleRegister} className="space-y-4">
+              <img src={reg} alt="" className='h-72 mx-auto' />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name

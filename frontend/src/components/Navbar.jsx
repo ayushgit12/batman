@@ -4,6 +4,7 @@ import {
   LogIn,
   NewspaperIcon,
   UserPlus,
+  Menu,
   LogOut,
   LayoutDashboard,
   BarChart3,
@@ -11,14 +12,24 @@ import {
   FileBarChart,
   IndianRupee,
   Calculator,
-  UserRound, // Added UserRound icon for Accounts
+  UserRound,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Sidebar from "./Sidebar"; // Import the Sidebar component
 
 const Navbar = ({ onLoginClick, onRegisterClick }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(
     localStorage.getItem("token") ? true : false
   );
+
+  const openSidebar = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsOpen(false);
+  };
 
   useEffect(() => {
     const handleAuthChange = () => {
@@ -64,7 +75,15 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            <motion.button
+              onClick={openSidebar}
+              className="text-gray-600 hover:text-gray-800 z-50 cursor-pointer"
+              variants={itemVariants}
+              whileHover="hover"
+            >
+              <Menu className="w-6 h-6" />
+            </motion.button>
             <motion.div
               className="flex items-center cursor-pointer"
               onClick={() => (window.location.href = "/")}
@@ -90,9 +109,8 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
                 variants={itemVariants}
                 whileHover="hover"
               >
-                <UserRound className="w-5 h-5 mr-1" />{" "}
-                {/* Changed to UserRound */}
-                Accounts {/* Changed "Home" to "Accounts" */}
+                <UserRound className="w-5 h-5 mr-1" />
+                Accounts
               </motion.button>
               <motion.button
                 onClick={() => (window.location.href = "/news")}
@@ -103,33 +121,7 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
                 <NewspaperIcon className="w-5 h-5 mr-1" />
                 Stock News
               </motion.button>
-              <motion.button
-                onClick={() => (window.location.href = "/buysell")}
-                className="flex items-center text-gray-600 hover:text-gray-800 cursor-pointer font-medium transition duration-300 ease-in-out"
-                variants={itemVariants}
-                whileHover="hover"
-              >
-                <IndianRupee className="w-5 h-5 mr-1" />
-                Buy/Sell
-              </motion.button>
-              <motion.button
-                onClick={() => (window.location.href = "/compare")}
-                className="flex items-center text-gray-600 hover:text-gray-800 cursor-pointer font-medium transition duration-300 ease-in-out"
-                variants={itemVariants}
-                whileHover="hover"
-              >
-                <Columns2 className="w-5 h-5 mr-1" />
-                Compare
-              </motion.button>
-              <motion.button
-                onClick={() => (window.location.href = "/papertrading")}
-                className="flex items-center text-gray-600 hover:text-gray-800 cursor-pointer font-medium transition duration-300 ease-in-out"
-                variants={itemVariants}
-                whileHover="hover"
-              >
-                <FileBarChart className="w-5 h-5 mr-1" />
-                Paper Trading
-              </motion.button>
+              
               <motion.button
                 onClick={() => (window.location.href = "/comparisonchart")}
                 className="flex items-center text-gray-600 hover:text-gray-800 cursor-pointer font-medium transition duration-300 ease-in-out"
@@ -148,15 +140,7 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
                 <BarChart3 className="w-5 h-5 mr-1" />
                 Portfolio
               </motion.button>
-              <motion.button
-                onClick={() => (window.location.href = "/stockanalysis")}
-                className="flex items-center text-gray-600 hover:text-gray-800 cursor-pointer font-medium transition duration-300 ease-in-out"
-                variants={itemVariants}
-                whileHover="hover"
-              >
-                <Calculator className="w-5 h-5 mr-1" />
-                Stock Analysis
-              </motion.button>
+              
             </motion.div>
           )}
           {!isAuthenticated && (
@@ -187,6 +171,7 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
           )}
         </div>
       </div>
+      <Sidebar isOpen={isOpen} onClose={closeSidebar} />
     </motion.nav>
   );
 };

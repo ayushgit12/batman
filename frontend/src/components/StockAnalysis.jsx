@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import SearchBar from "./SearchBar";
-// import CandleStickChart from "./CandleStickChart.jsx";
 import StockInfo from "./StockInfo.jsx";
 import LoadingSpinner from "./LoadingSpinner"; // Ensure component exists
 import ErrorMessage from "./ErrorMessage"; // Ensure component exists

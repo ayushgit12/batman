@@ -11,8 +11,12 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+
 } from "recharts";
+import { motion } from "framer-motion";
 import {
+  Briefcase,
+  IndianRupee,
   AlertCircle,
   CheckCircle,
   TrendingUp,
@@ -42,6 +46,22 @@ const InvestorBehaviorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [userStocks, setUserStocks] = useState([]);
+
+    useEffect(() => {
+       const us = localStorage.getItem('stocksData');
+       if (us) {
+         try {
+           const parsedStocks = JSON.parse(us);
+           const tickers = parsedStocks.map(stock => stock.Ticker);
+           setUserStocks(tickers);
+         } catch (error) {
+           console.error('Error parsing stocksData from localStorage:', error);
+         }
+       }
+     }, []);
+    // Sample performance data for visualization
+
   useEffect(() => {
     const fetchAnalysis = async () => {
       try {
@@ -63,6 +83,23 @@ const InvestorBehaviorDashboard = () => {
 
     fetchAnalysis();
   }, []);
+
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
+  };
+
+  const stockTagColors = [
+    'bg-blue-100 text-blue-800',
+    'bg-green-100 text-green-800',
+    'bg-purple-100 text-purple-800',
+    'bg-amber-100 text-amber-800',
+    'bg-rose-100 text-rose-800',
+    'bg-cyan-100 text-cyan-800',
+  ];
+
+
 
   if (loading) {
     return (
@@ -218,15 +255,13 @@ const InvestorBehaviorDashboard = () => {
   }
 
   return (
-    <div>
-      <Navbar />
-      <div className="bg-white mt-8 rounded-lg shadow p-4 max-w-4xl mx-auto">
-        <div className="flex items-center mb-4">
-          <BarChart2 className="text-blue-500 mr-2" size={24} />
-          <h2 className="text-3xl mb-2 text-center font-bold">
-            Your Investment Style Analysis
-          </h2>
-        </div>
+     <div>
+     <Navbar />
+    <div className="bg-white mt-8 rounded-lg shadow p-4 max-w-4xl mx-auto">
+      <div className="flex items-center mb-4">
+        <BarChart2 className="text-blue-500 mr-2" size={24} />
+        <h2 className="text-3xl mb-2 text-center font-bold">Your Investment Style Analysis</h2>
+      </div>
 
         {/* Investor Style Card */}
         <div className="mb-6 bg-blue-50 p-4 rounded-lg">
