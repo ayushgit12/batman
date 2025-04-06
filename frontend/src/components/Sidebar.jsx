@@ -10,11 +10,16 @@ import {
   Lightbulb,
   Briefcase,
   ArrowUpRightSquare,
+  ChartAreaIcon,
   Home,
   LineChart,
   Search,
 
   X,
+  SearchCheckIcon,
+  SearchX,
+  SearchCodeIcon,
+  SearchCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -50,13 +55,13 @@ const Sidebar = ({ isOpen, onClose }) => {
     { icon: IndianRupee, text: "Buy/Sell", path: "/buysell" },
     { icon: Columns2, text: "Compare", path: "/compare" },
     { icon: FileBarChart, text: "Paper Trading", path: "/papertrading" },
-    { icon: BarChart3, text: "Comparison Chart", path: "/comparisonchart" },
+    { icon: ChartAreaIcon, text: "Comparison Chart", path: "/comparisonchart" },
     { icon: BarChart3, text: "Portfolio", path: "/dashboard" },
-    { icon: Calculator, text: "Search For Stocks", path: "/stockanalysis" },
+    { icon: Search, text: "Search For Stocks", path: "/stockanalysis" },
     { icon: Lightbulb, text: "Recommendations", path: "/recommendations" }, // Added based on your routes
     { icon: LineChart, text: "Investor Behavior", path: "/investor_behavior" }, // Added based on your routes
     { icon: Home, text: "Home", path: "/" }, // Added based on your routes
-    { icon: Search, text: "Search", path: "/search" }, // Added based on your routes
+    { icon: SearchCheck, text: "Ticker Finder", path: "/search" }, // Added based on your routes
 ];
 
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, AlertTriangle, Key, Lock, Fingerprint, Shield, ChevronRight } from 'lucide-react';
+import { X, AlertTriangle, Key, Lock, Fingerprint, Shield, ChevronRight, GitBranch } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import Navbar from './Navbar';
 import { useNavigate } from 'react-router-dom';
@@ -40,6 +40,14 @@ const tradingApps = [
     description: 'Integrate your Fyers account for comprehensive trading solutions.',
     warning: 'API access requires enabling API features from your Fyers account settings.',
   },
+  {
+    id: 'motilal',
+    name: 'Motilal Oswal',
+    color: 'bg-amber-500',
+    icon: <GitBranch className="w-8 h-8" />,
+    description: 'Connect your Motilal Oswal account for enhanced trading capabilities.',
+    warning: 'Ensure you have the required permissions enabled for API access.',
+  }
 ];
 
 

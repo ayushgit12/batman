@@ -11,8 +11,12 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+
 } from "recharts";
+import { motion } from "framer-motion";
 import {
+  Briefcase,
+  IndianRupee,
   AlertCircle,
   CheckCircle,
   TrendingUp,
@@ -41,6 +45,22 @@ const InvestorBehaviorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [userStocks, setUserStocks] = useState([]);
+
+    useEffect(() => {
+       const us = localStorage.getItem('stocksData');
+       if (us) {
+         try {
+           const parsedStocks = JSON.parse(us);
+           const tickers = parsedStocks.map(stock => stock.Ticker);
+           setUserStocks(tickers);
+         } catch (error) {
+           console.error('Error parsing stocksData from localStorage:', error);
+         }
+       }
+     }, []);
+    // Sample performance data for visualization
+
   useEffect(() => {
     const fetchAnalysis = async () => {
       try {
@@ -60,6 +80,23 @@ const InvestorBehaviorDashboard = () => {
 
     fetchAnalysis();
   }, []);
+
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
+  };
+
+  const stockTagColors = [
+    'bg-blue-100 text-blue-800',
+    'bg-green-100 text-green-800',
+    'bg-purple-100 text-purple-800',
+    'bg-amber-100 text-amber-800',
+    'bg-rose-100 text-rose-800',
+    'bg-cyan-100 text-cyan-800',
+  ];
+
+
 
   if (loading) {
     return (
@@ -135,6 +172,33 @@ const InvestorBehaviorDashboard = () => {
   return (
      <div>
      <Navbar />
+
+    {/* User's Current Stocks */}
+    <motion.div 
+          className="bg-white rounded-lg shadow-md max-w-6xl mx-auto mt-8 p-6 mb-6"
+          variants={itemVariants}
+        >
+          <div className="flex items-center mb-4">
+            <Briefcase className="mr-2 text-blue-700" />
+            <h2 className="text-xl font-semibold text-blue-800">Your Portfolio</h2>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 mb-4">
+            {userStocks.map((stock, index) => (
+              <motion.div 
+                key={stock}
+                className={`px-3 py-2 rounded-full ${stockTagColors[index % stockTagColors.length]} font-medium flex items-center`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <IndianRupee size={16} className="mr-1" />
+                {stock}
+              </motion.div>
+            ))}
+          </div>
+          </motion.div>
+
+
     <div className="bg-white mt-8 rounded-lg shadow p-4 max-w-4xl mx-auto">
       <div className="flex items-center mb-4">
         <BarChart2 className="text-blue-500 mr-2" size={24} />
