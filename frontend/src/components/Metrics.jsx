@@ -115,42 +115,41 @@ const StockMetricsDashboard = ({ stockData }) => {
     }
   };
 
-  // Get explanation for a metric
+  // Get explanation for a metric (jargon-free)
   const getMetricExplanation = (metric) => {
     switch (metric) {
       case "P/E Ratio":
-        return "Price-to-Earnings ratio compares stock price to earnings per share. Lower is better, suggesting the stock is potentially undervalued. Above 30 may indicate overvaluation.";
+        return "This shows how much investors are willing to pay for each dollar the company earns. A lower number might mean the stock is a better deal 💰, while a very high number could suggest it's expensive 💸.";
       case "P/B Ratio":
-        return "Price-to-Book ratio compares stock price to book value. Lower values (under 3) may indicate undervaluation. High values might suggest overvaluation or exceptional future growth prospects.";
+        return "This compares the company's stock price to the value of its assets if it sold everything. A low number might mean you're getting a good value for what the company owns 🏢, but a high number could mean you're paying a lot for those assets 🏦.";
       case "Dividend Yield":
-        return "Annual dividend payment as percentage of stock price. Higher yields provide income but very high yields could signal trouble. Zero means no dividend is paid.";
+        return "This is the percentage of the stock price that the company pays out in dividends each year. A higher percentage means you get more income from holding the stock 🤑, but a zero means they don't pay dividends 🚫.";
       case "Return on Equity (ROE)":
-        return "Measures profitability relative to shareholders' equity. Higher values (above 15%) indicate efficient use of capital and strong management.";
+        return "This measures how well the company is using the money invested by its shareholders to generate profit. A higher percentage (above 15%) usually means the company is good at making money from your investment 👍.";
       case "Debt to Equity Ratio":
-        return "Measures financial leverage by comparing debt to equity. Lower values suggest less financial risk. Above 2 may indicate high financial risk.";
+        return "This shows how much the company owes compared to how much it owns (its equity). A lower number is generally better as it means the company has less debt and might be less risky 🤔. A high number could indicate they have a lot of debt 😬.";
       case "Operating Margin":
-        return "Percentage of revenue retained after operating expenses. Higher margins indicate operational efficiency and pricing power.";
+        return "This is the percentage of revenue left after covering the basic costs of running the business (like salaries and rent). A higher margin shows the company is efficient at its core operations 💪.";
       case "Profit Margin":
-        return "Percentage of revenue converted to profit. Higher margins suggest strong business model and competitive advantages.";
+        return "This is the percentage of revenue that turns into actual profit after all expenses are paid. A higher margin means the company keeps more money from each sale 🎉.";
       case "Revenue Growth":
-        return "Year-over-year increase in company's sales. Higher growth suggests strong market demand and competitive position.";
+        return "This shows how much the company's sales have increased over the past year. Higher growth usually means the company is doing well and attracting more customers 🌱.";
       case "Earnings Growth":
-        return "Year-over-year increase in profits. Sustained high growth may lead to higher stock valuations.";
+        return "This shows how much the company's profits have increased over the past year. Growing profits can be a sign of a healthy and expanding business 📈.";
       case "Market Cap":
-        return "Total market value of all outstanding shares. Larger companies tend to be more stable but may grow slower than smaller ones.";
+        return "This is the total value of all the company's outstanding shares of stock. It's like the price tag for the entire company. Big companies tend to be more stable but might grow slower 🐢, while smaller ones can grow faster but might be riskier 🚀.";
       case "Beta":
-        return "Measure of stock volatility compared to the market. Beta > 1 means more volatile than the market; beta < 1 means less volatile.";
+        return "This measures how much a stock's price tends to move compared to the overall stock market. A beta greater than 1 means the stock is more volatile than the market 🎢, and a beta less than 1 means it's less volatile 安定.";
       case "Current Price":
-        return "Latest trading price of the stock.";
+        return "This is the latest price at which the stock was traded 💲.";
       case "52-Week High/Low":
-        return "Highest and lowest price points in the past year. Shows trading range and potential support/resistance levels.";
+        return "These are the highest and lowest prices the stock has traded at over the past 52 weeks. It gives you an idea of the stock's recent price range 📊.";
       case "Analyst Recommendations":
-        return "Average rating from financial analysts. Lower values (closer to 1) indicate stronger buy recommendations.";
+        return "This is the average rating given by financial experts who analyze the stock. Lower numbers (closer to 1) usually mean they think it's a good time to buy 👍, while higher numbers suggest caution or selling 👎.";
       default:
-        return "Financial metric used to evaluate company performance and health.";
+        return "This is a financial number used to understand how a company is doing.";
     }
   };
-
   // Price position relative to 52-week range
   const pricePosition =
     ((data["Current Price"] - data["52-Week Low"]) /
@@ -383,7 +382,6 @@ const StockMetricsDashboard = ({ stockData }) => {
         </div>
       )}
 
-      {/* Valuation Tab */}
       {activeTab === "valuation" && (
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -425,44 +423,68 @@ const StockMetricsDashboard = ({ stockData }) => {
               </h3>
               <div className="space-y-4">
                 <div>
-                  <p className="font-medium">
-                    P/E Ratio: {data["P/E Ratio"]?.toFixed(2) || "N/A"}
+                  <p className="font-medium group cursor-help">
+                    <span className="relative">
+                      P/E Ratio: {data["P/E Ratio"]?.toFixed(2) || "N/A"}
+                      <span className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white p-2 rounded w-64 left-1/2 -translate-x-1/2 top-full mt-1 text-xs">
+                        {getMetricExplanation("P/E Ratio")}
+                      </span>
+                    </span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    {getMetricExplanation("P/E Ratio")}
+                    The <span className="font-medium">P/E Ratio</span> suggests
+                    the stock might be{" "}
                     <span
                       className={`font-medium ${getMetricStatus("P/E Ratio", data["P/E Ratio"]) === "good" ? "text-green-500" : getMetricStatus("P/E Ratio", data["P/E Ratio"]) === "bad" ? "text-red-500" : "text-yellow-500"}`}
                     >
-                      {" "}
                       {getMetricStatus("P/E Ratio", data["P/E Ratio"]) ===
                       "good"
-                        ? "Good"
+                        ? "attractively priced"
                         : getMetricStatus("P/E Ratio", data["P/E Ratio"]) ===
                             "bad"
-                          ? "Concerning"
-                          : "Neutral"}{" "}
-                      for your investment.
+                          ? "pricey"
+                          : "moderately valued"}{" "}
+                      {getMetricStatus("P/E Ratio", data["P/E Ratio"]) ===
+                      "good"
+                        ? "👍"
+                        : getMetricStatus("P/E Ratio", data["P/E Ratio"]) ===
+                            "bad"
+                          ? "😬"
+                          : "🤔"}
+                      .
                     </span>
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium">
-                    P/B Ratio: {data["P/B Ratio"]?.toFixed(2) || "N/A"}
+                  <p className="font-medium group cursor-help">
+                    <span className="relative">
+                      P/B Ratio: {data["P/B Ratio"]?.toFixed(2) || "N/A"}
+                      <span className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white p-2 rounded w-64 left-1/2 -translate-x-1/2 top-full mt-1 text-xs">
+                        {getMetricExplanation("P/B Ratio")}
+                      </span>
+                    </span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    {getMetricExplanation("P/B Ratio")}
+                    The <span className="font-medium">P/B Ratio</span> indicates
+                    the stock's value relative to its assets is{" "}
                     <span
                       className={`font-medium ${getMetricStatus("P/B Ratio", data["P/B Ratio"]) === "good" ? "text-green-500" : getMetricStatus("P/B Ratio", data["P/B Ratio"]) === "bad" ? "text-red-500" : "text-yellow-500"}`}
                     >
-                      {" "}
                       {getMetricStatus("P/B Ratio", data["P/B Ratio"]) ===
                       "good"
-                        ? "Good"
+                        ? "potentially good"
                         : getMetricStatus("P/B Ratio", data["P/B Ratio"]) ===
                             "bad"
-                          ? "Concerning"
-                          : "Neutral"}{" "}
-                      for your investment.
+                          ? "high"
+                          : "reasonable"}{" "}
+                      {getMetricStatus("P/B Ratio", data["P/B Ratio"]) ===
+                      "good"
+                        ? "✅"
+                        : getMetricStatus("P/B Ratio", data["P/B Ratio"]) ===
+                            "bad"
+                          ? "🚩"
+                          : "👌"}
+                      .
                     </span>
                   </p>
                 </div>
@@ -522,52 +544,85 @@ const StockMetricsDashboard = ({ stockData }) => {
               </h3>
               <div className="space-y-4">
                 <div>
-                  <p className="font-medium">
-                    Operating Margin: {formatPercent(data["Operating Margin"])}
+                  <p className="font-medium group cursor-help">
+                    <span className="relative">
+                      Operating Margin:{" "}
+                      {formatPercent(data["Operating Margin"])}
+                      <span className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white p-2 rounded w-64 left-1/2 -translate-x-1/2 top-full mt-1 text-xs">
+                        {getMetricExplanation("Operating Margin")}
+                      </span>
+                    </span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    {getMetricExplanation("Operating Margin")}
+                    The <span className="font-medium">Operating Margin</span>
+                    suggests the company's core business is{" "}
                     <span
                       className={`font-medium ${getMetricStatus("Operating Margin", data["Operating Margin"]) === "good" ? "text-green-500" : getMetricStatus("Operating Margin", data["Operating Margin"]) === "bad" ? "text-red-500" : "text-yellow-500"}`}
                     >
-                      {" "}
                       {getMetricStatus(
                         "Operating Margin",
                         data["Operating Margin"]
                       ) === "good"
-                        ? "Strong"
+                        ? "efficient"
                         : getMetricStatus(
                               "Operating Margin",
                               data["Operating Margin"]
                             ) === "bad"
-                          ? "Weak"
-                          : "Average"}{" "}
-                      operational efficiency.
+                          ? "struggling"
+                          : "doing okay"}{" "}
+                      {getMetricStatus(
+                        "Operating Margin",
+                        data["Operating Margin"]
+                      ) === "good"
+                        ? "👍"
+                        : getMetricStatus(
+                              "Operating Margin",
+                              data["Operating Margin"]
+                            ) === "bad"
+                          ? "😟"
+                          : "😐"}
+                      .
                     </span>
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium">
-                    Profit Margin: {formatPercent(data["Profit Margin"])}
+                  <p className="font-medium group cursor-help">
+                    <span className="relative">
+                      Profit Margin: {formatPercent(data["Profit Margin"])}
+                      <span className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white p-2 rounded w-64 left-1/2 -translate-x-1/2 top-full mt-1 text-xs">
+                        {getMetricExplanation("Profit Margin")}
+                      </span>
+                    </span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    {getMetricExplanation("Profit Margin")}
+                    The <span className="font-medium">Profit Margin</span> shows
+                    how much money the company keeps after all costs, indicating{" "}
                     <span
                       className={`font-medium ${getMetricStatus("Profit Margin", data["Profit Margin"]) === "good" ? "text-green-500" : getMetricStatus("Profit Margin", data["Profit Margin"]) === "bad" ? "text-red-500" : "text-yellow-500"}`}
                     >
-                      {" "}
                       {getMetricStatus(
                         "Profit Margin",
                         data["Profit Margin"]
                       ) === "good"
-                        ? "Strong"
+                        ? "strong earnings"
                         : getMetricStatus(
                               "Profit Margin",
                               data["Profit Margin"]
                             ) === "bad"
-                          ? "Weak"
-                          : "Average"}{" "}
-                      profitability.
+                          ? "weak earnings"
+                          : "decent earnings"}{" "}
+                      {getMetricStatus(
+                        "Profit Margin",
+                        data["Profit Margin"]
+                      ) === "good"
+                        ? "💰"
+                        : getMetricStatus(
+                              "Profit Margin",
+                              data["Profit Margin"]
+                            ) === "bad"
+                          ? "📉"
+                          : "📊"}
+                      .
                     </span>
                   </p>
                 </div>
@@ -622,52 +677,84 @@ const StockMetricsDashboard = ({ stockData }) => {
               </h3>
               <div className="space-y-4">
                 <div>
-                  <p className="font-medium">
-                    Revenue Growth: {formatPercent(data["Revenue Growth"])}
+                  <p className="font-medium group cursor-help">
+                    <span className="relative">
+                      Revenue Growth: {formatPercent(data["Revenue Growth"])}
+                      <span className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white p-2 rounded w-64 left-1/2 -translate-x-1/2 top-full mt-1 text-xs">
+                        {getMetricExplanation("Revenue Growth")}
+                      </span>
+                    </span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    {getMetricExplanation("Revenue Growth")}
+                    The <span className="font-medium">Revenue Growth</span>
+                    indicates the company's sales are{" "}
                     <span
                       className={`font-medium ${getMetricStatus("Revenue Growth", data["Revenue Growth"]) === "good" ? "text-green-500" : getMetricStatus("Revenue Growth", data["Revenue Growth"]) === "bad" ? "text-red-500" : "text-yellow-500"}`}
                     >
-                      {" "}
                       {getMetricStatus(
                         "Revenue Growth",
                         data["Revenue Growth"]
                       ) === "good"
-                        ? "Strong"
+                        ? "increasing nicely"
                         : getMetricStatus(
                               "Revenue Growth",
                               data["Revenue Growth"]
                             ) === "bad"
-                          ? "Weak"
-                          : "Moderate"}{" "}
-                      top-line growth.
+                          ? "not growing much"
+                          : "growing steadily"}{" "}
+                      {getMetricStatus(
+                        "Revenue Growth",
+                        data["Revenue Growth"]
+                      ) === "good"
+                        ? "🚀"
+                        : getMetricStatus(
+                              "Revenue Growth",
+                              data["Revenue Growth"]
+                            ) === "bad"
+                          ? "🐌"
+                          : "🚶"}
+                      .
                     </span>
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium">
-                    Earnings Growth: {formatPercent(data["Earnings Growth"])}
+                  <p className="font-medium group cursor-help">
+                    <span className="relative">
+                      Earnings Growth: {formatPercent(data["Earnings Growth"])}
+                      <span className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white p-2 rounded w-64 left-1/2 -translate-x-1/2 top-full mt-1 text-xs">
+                        {getMetricExplanation("Earnings Growth")}
+                      </span>
+                    </span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    {getMetricExplanation("Earnings Growth")}
+                    The <span className="font-medium">Earnings Growth</span>
+                    shows the company's profits are{" "}
                     <span
                       className={`font-medium ${getMetricStatus("Earnings Growth", data["Earnings Growth"]) === "good" ? "text-green-500" : getMetricStatus("Earnings Growth", data["Earnings Growth"]) === "bad" ? "text-red-500" : "text-yellow-500"}`}
                     >
-                      {" "}
                       {getMetricStatus(
                         "Earnings Growth",
                         data["Earnings Growth"]
                       ) === "good"
-                        ? "Strong"
+                        ? "rising well"
                         : getMetricStatus(
                               "Earnings Growth",
                               data["Earnings Growth"]
                             ) === "bad"
-                          ? "Weak"
-                          : "Moderate"}{" "}
-                      bottom-line growth.
+                          ? "not growing well"
+                          : "growing moderately"}{" "}
+                      {getMetricStatus(
+                        "Earnings Growth",
+                        data["Earnings Growth"]
+                      ) === "good"
+                        ? "📈"
+                        : getMetricStatus(
+                              "Earnings Growth",
+                              data["Earnings Growth"]
+                            ) === "bad"
+                          ? "📉"
+                          : "➡️"}
+                      .
                     </span>
                   </p>
                 </div>
@@ -683,38 +770,46 @@ const StockMetricsDashboard = ({ stockData }) => {
         <p className="text-gray-700">
           {data["Company Name"]} shows
           {getMetricStatus("Profit Margin", data["Profit Margin"]) === "good"
-            ? " strong"
+            ? " strong 💪"
             : getMetricStatus("Profit Margin", data["Profit Margin"]) === "bad"
-              ? " weak"
-              : " average"}{" "}
+              ? " weak 😔"
+              : " average 😐"}{" "}
           profitability with
           {data["Profit Margin"]
-            ? ` a ${(data["Profit Margin"] * 100).toFixed(2)}% profit margin`
+            ? ` a ${(data["Profit Margin"] * 100).toFixed(2)}% profit margin 🎉`
             : ""}
           .
           {getMetricStatus("P/E Ratio", data["P/E Ratio"]) === "good"
-            ? " Valuation appears reasonable"
+            ? " Valuation appears reasonable 👍"
             : getMetricStatus("P/E Ratio", data["P/E Ratio"]) === "bad"
-              ? " Valuation appears elevated"
-              : " Valuation is moderate"}
-          with a P/E ratio of {data["P/E Ratio"]?.toFixed(2) || "N/A"}. Growth
-          is{" "}
+              ? " Valuation appears elevated 😬"
+              : " Valuation is moderate 🤔"}
+          with a{" "}
+          <span className="font-medium group cursor-help">
+            <span className="relative">
+              P/E ratio
+              <span className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white p-2 rounded w-64 left-1/2 -translate-x-1/2 top-full mt-1 text-xs">
+                {getMetricExplanation("P/E Ratio")}
+              </span>
+            </span>
+          </span>{" "}
+          of {data["P/E Ratio"]?.toFixed(2) || "N/A"}. Growth is{" "}
           {getMetricStatus("Revenue Growth", data["Revenue Growth"]) === "good"
-            ? "robust"
+            ? "robust 🌱"
             : getMetricStatus("Revenue Growth", data["Revenue Growth"]) ===
                 "bad"
-              ? "sluggish"
-              : "moderate"}
+              ? "sluggish 🐌"
+              : "moderate 🚶"}
           with{" "}
           {data["Revenue Growth"]
-            ? `${(data["Revenue Growth"] * 100).toFixed(2)}% revenue growth`
-            : "moderate revenue growth"}
+            ? `${(data["Revenue Growth"] * 100).toFixed(2)}% revenue growth 📈`
+            : "moderate revenue growth ➡️"}
           . Analysts are{" "}
           {data["Analyst Recommendation Mean"] < 2.5
-            ? "generally positive"
+            ? "generally positive ✅"
             : data["Analyst Recommendation Mean"] < 3.5
-              ? "neutral"
-              : "generally negative"}{" "}
+              ? "neutral 🤷"
+              : "generally negative 👎"}{" "}
           on the stock with a consensus{" "}
           {data["Analyst Recommendation Key"] || "hold"} rating.
         </p>

@@ -53,9 +53,7 @@ service-identity==24.2.0
 six==1.17.0
 smartapi-python==1.5.5
 soupsieve==2.6
-sympy==1.13.1
 threadpoolctl==3.6.0
-tomli==2.2.1
 torch==2.6.0
 tqdm==4.67.1
 Twisted==24.11.0
