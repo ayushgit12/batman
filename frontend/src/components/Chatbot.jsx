@@ -15,9 +15,7 @@ const Chatbot = () => {
     if (messages.length === 0) {
       setMessages([
         {
-          text: ```Hi there! 👋 I'm ChatFin, your financial assistant. How can I help you today?
-          If you want to navigate to a specific page, just type "Navigate to [page name]". For example, "Navigate to stock analysis" or "Navigate to recommendations".
-          ```,
+          text: "Hi there! 👋 I'm ChatFin, your financial assistant. How can I help you today? \n If you want to navigate to a specific page, just type Navigate to [page name]. For example, Navigate to stock analysis or Navigate to recommendations.",
           sender: "bot",
         },
       ]);

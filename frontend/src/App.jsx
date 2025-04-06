@@ -322,6 +322,7 @@ const App = () => {
           <Route path="/upstox_holdings" element={<Upstox_Holdings />} />
           <Route path="/buysell" element={<BuySell />} />
           <Route path="/motilal" element={<Motilal />} />
+          <Route path="/recommendations" element={<Recommendations />} />
           <Route
             path="/investor_behavior"
             element={<InvestorBehaviorDashboard />}
