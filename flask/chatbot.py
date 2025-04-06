@@ -36,7 +36,9 @@ Personalized Advice: When provided with user behavior analysis, tailor your reco
 
 Encouraging & Supportive: Your tone should always be positive, supportive, and non-judgmental, encouraging users to learn and take control of their finances.
 
-Your mission is to empower users with straightforward, jargon-free financial insights, making complex concepts easy to understand and decisions feel confident.'''
+Your mission is to empower users with straightforward, jargon-free financial insights, making complex concepts easy to understand and decisions feel confident.
+Answer in max 60 words.
+'''
     )
 except AttributeError as e:
     raise ImportError("Ensure you're using the correct version of google-generativeai library.") from e

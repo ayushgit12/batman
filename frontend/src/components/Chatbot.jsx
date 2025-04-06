@@ -15,7 +15,9 @@ const Chatbot = () => {
     if (messages.length === 0) {
       setMessages([
         {
-          text: "Hi there! 👋 I'm ChatFin, your financial assistant. How can I help you today?",
+          text: ```Hi there! 👋 I'm ChatFin, your financial assistant. How can I help you today?
+          If you want to navigate to a specific page, just type "Navigate to [page name]". For example, "Navigate to stock analysis" or "Navigate to recommendations".
+          ```,
           sender: "bot",
         },
       ]);
@@ -24,6 +26,63 @@ const Chatbot = () => {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+
+    if(input === "Navigate to stock analysis") {
+      window.location.href = "/stockanalysis";
+      return;
+    }
+    if(input === "Navigate to recommendations") {
+      window.location.href = "/recommendations";
+      return;
+    }
+    if(input === "Navigate to news") {
+      window.location.href = "/news";
+      return;
+    }
+    if(input === "Navigate to paper trading") {
+      window.location.href = "/papertrading";   
+      return;
+    }
+
+    if(input === "Navigate to portfolio") {
+      window.location.href = "/dashboard";
+      return;
+    }
+    if(input === "Navigate to trading accounts") {
+      window.location.href = "/appdetails";
+      return;
+    }
+    if(input === "Navigate to buy/sell") {
+      window.location.href = "/buysell";
+      return;
+    }
+    if(input === "Navigate to comparison chart") {
+      window.location.href = "/comparisonchart";
+      return;
+    }
+    if(input === "Navigate to investor behavior") {
+      window.location.href = "/investor_behavior";
+
+      return;
+    }
+    if(input === "Navigate to home") {
+      window.location.href = "/";
+      return;
+
+
+    }
+
+    if(input === "Navigate to compare") {
+      window.location.href = "/compare";
+      return;
+    }
+
+    if(input === "Navigate to search for stocks") {
+      window.location.href = "/search";
+      return;
+    }
+    
+
 
     const newMessages = [...messages, { text: input, sender: "user" }];
     setMessages(newMessages);

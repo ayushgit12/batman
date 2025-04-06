@@ -13,6 +13,8 @@ import {
   IndianRupee,
   Calculator,
   UserRound,
+  UserCheck,
+  UserRoundCog,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Sidebar from "./Sidebar"; // Import the Sidebar component
@@ -109,8 +111,8 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
                 variants={itemVariants}
                 whileHover="hover"
               >
-                <UserRound className="w-5 h-5 mr-1" />
-                Accounts
+                <UserRoundCog className="w-5 h-5 mr-1" />
+                Trading Accounts
               </motion.button>
               <motion.button
                 onClick={() => (window.location.href = "/news")}

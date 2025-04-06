@@ -16,9 +16,7 @@ import {
   Search,
 
   X,
-  SearchCheckIcon,
-  SearchX,
-  SearchCodeIcon,
+
   SearchCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
