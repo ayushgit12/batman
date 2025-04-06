@@ -146,7 +146,7 @@ const FinanceQuestionPopup = () => {
           animate={{ opacity: 1, y: 0, x: 0 }}
           exit={{ opacity: 0, y: 50 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-4 left-4 bg-white rounded-lg p-6 max-w-sm z-50 shadow-lg"
+          className="fixed bottom-4 left-4 bg-white rounded-lg p-6 max-w-sm z-40 shadow-lg"
           style={{
             boxShadow: '0 10px 25px rgba(59, 130, 246, 0.3)',
             borderTop: '4px solid #3b82f6'

@@ -17,6 +17,7 @@ import InvestorBehaviorDashboard from "./components/Behaviour";
 import StockAnalysisPage from "./components/StockAnalysis";
 import FinanceQuestionPopupWithStyles from "./components/QuestionPopup";
 import Chatbot from "./components/Chatbot";
+import Recommendations from "./components/Recommendations";
 
 // Sample data for fallback purposes
 const sampleStockData = {
@@ -133,6 +134,7 @@ const Dashboard = () => {
 
         if (Array.isArray(data) && data.length > 0) {
           setStocksData(data);
+          localStorage.setItem("stocksData", JSON.stringify(data));
         } else {
           console.warn("No stock data received, using sample data");
           setStocksData([sampleStockData]);
@@ -308,6 +310,7 @@ const App = () => {
           <Route path="/buysell" element={<BuySell />} />
           <Route path="/investor_behavior" element={<InvestorBehaviorDashboard />} />
           <Route path="/stockanalysis" element={<StockAnalysisPage />} />
+          <Route path="/recommendations" element={<Recommendations />} />
 
         </Routes>
       </div>

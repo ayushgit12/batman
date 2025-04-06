@@ -23,12 +23,14 @@ def create_app():
     from app.routes.upstox_routes import upstox_bp
     from app.routes.finance_question import finance_bp
     from app.routes.chatbot import chatbot_bp
+    from app.routes.recommendations import recommendations_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(stock_bp)
     app.register_blueprint(watchlist_bp)
     app.register_blueprint(upstox_bp)
     app.register_blueprint(finance_bp)
+    app.register_blueprint(recommendations_bp)
     app.register_blueprint(chatbot_bp)
 
     # Serve frontend
