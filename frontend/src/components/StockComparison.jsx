@@ -12,6 +12,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import Navbar from "./Navbar";
 
 const StockComparison = () => {
   const [ticker1, setTicker1] = useState("AAPL");
@@ -199,8 +200,10 @@ const StockComparison = () => {
   }
 
   return (
+    <div>
+      <Navbar />
     <div className="container mx-auto p-4 max-w-6xl">
-      <h1 className="text-2xl font-bold mb-6 text-center">
+      <h1 className="text-3xl font-bold mb-6 text-center">
         Stock Fundamental Comparison
       </h1>
 
@@ -663,6 +666,7 @@ const StockComparison = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

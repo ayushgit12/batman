@@ -15,6 +15,8 @@ import Upstox_Holdings from "./components/Upstox_Holdings";
 import BuySell from "./components/BuySell";
 import InvestorBehaviorDashboard from "./components/Behaviour";
 import StockAnalysisPage from "./components/StockAnalysis";
+import FinanceQuestionPopupWithStyles from "./components/QuestionPopup";
+import Chatbot from "./components/Chatbot";
 
 // Sample data for fallback purposes
 const sampleStockData = {
@@ -290,6 +292,8 @@ const App = () => {
   return (
     <Router>
       <div className="min-h-screen bg-gray-100">
+        <FinanceQuestionPopupWithStyles />
+        <Chatbot />
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -304,6 +308,7 @@ const App = () => {
           <Route path="/buysell" element={<BuySell />} />
           <Route path="/investor_behavior" element={<InvestorBehaviorDashboard />} />
           <Route path="/stockanalysis" element={<StockAnalysisPage />} />
+
         </Routes>
       </div>
     </Router>
