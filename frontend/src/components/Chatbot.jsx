@@ -23,6 +23,7 @@ const Chatbot = () => {
   }, []);
 
   const sendMessage = async () => {
+    console.log("Sending message:", input);
     if (!input.trim()) return;
 
     if(input === "Navigate to stock analysis") {
@@ -79,6 +80,33 @@ const Chatbot = () => {
       window.location.href = "/search";
       return;
     }
+    
+    if (input.includes("my stocks") || input.includes("my portfolio")) {
+      
+      const us = localStorage.getItem('stocksData');
+
+
+      if (us) {
+        try {
+          const parsedStocks = JSON.parse(us);
+          const tickers = parsedStocks.map(stock => stock.Ticker);
+          const stockList = tickers.join(", ");
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { text: `Your stocks are: ${stockList}`, sender: "bot" },
+          ]);
+          setInput("");
+        } catch (error) {
+          console.error('Error parsing stocksData from localStorage:', error);
+          setMessages((prevMessages) => [
+            ...prevMessages,  
+            { text: "Sorry, I couldn't retrieve your stocks.", sender: "bot" },
+          ]);
+        }
+      }
+      return;
+    }
+
     
 
 

@@ -171,13 +171,9 @@ def get_stocks():
 
 import pandas as pd
 import numpy as np
-import torch
-import torch.nn as nn
 import datetime
 import yfinance as yf
 import joblib
-from sklearn.preprocessing import MinMaxScaler
-import json
 from tqdm import tqdm
 import os
 from typing import List, Dict, Any, Union, Tuple
@@ -426,7 +422,7 @@ def get_stock_predictions(tickers):
     # tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "META"]
     
     # Paths to saved model files
-    model_path = "bilstm_stock_model.pth"
+    model_path = "bilstm_stock_model_new.pth"
     scaler_path = "scaler_diff.pkl"
     metadata_path = "model_metadata.pkl"
     

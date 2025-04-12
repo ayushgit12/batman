@@ -7,6 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 
+const backendUrl = import.meta.env.VITE_BACKENDURL
+// console.log(backendUrl);
+
+
 const tradingApps = [
   {
     id: 'zerodha',
@@ -58,7 +62,7 @@ const UpstoxAuthorizationInputModal = ({ app, isOpen, onClose }) => {
      const handleGenerateAccessToken = async (e) => {
           e.preventDefault();
 
-          await axios.post("http://127.0.0.1:5000/upstox/callback", {
+          await axios.post(`${backendUrl}/upstox/callback`, {
                "code": authCode,
                "client_id": localStorage.getItem('upstox_api_key'),
                "client_secret": localStorage.getItem('upstox_client_id'),
