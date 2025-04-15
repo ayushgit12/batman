@@ -1,3 +1,5 @@
+
+https://github.com/user-attachments/assets/f9d53d79-cf28-460e-ad33-2c362936b5d7
 # 🚀 InvestSmart
 
 **Track, Analyze, and Execute Investments with Ease**
@@ -61,6 +63,19 @@ Managing investments today is messy. Investors need to:
 | 🧠 Backend    | Flask, REST API, MFU & Broker API Integration |
 | 🔍 ML Models  | LSTM, BiLSTM, UPBiLSTM, ARIMA, SARIMA     |
 | 🧾 Database   | MongoDB  |
+
+---
+
+## Some Screenshots
+
+<img width="1680" alt="Screenshot 2025-04-05 at 4 45 35 PM" src="https://github.com/user-attachments/assets/74575b5c-d14e-420a-896c-0414c335569f" />
+
+<img width="1680" alt="Screenshot 2025-04-05 at 4 52 10 PM" src="https://github.com/user-attachments/assets/fecaeaee-7809-4a94-a599-ea2df2b4dd33" />
+
+<img width="1680" alt="Screenshot 2025-04-05 at 4 52 18 PM" src="https://github.com/user-attachments/assets/71cdcdec-f015-4d38-acf2-d2d0aa74bb26" />
+
+## Website Overview:
+https://drive.google.com/file/d/1Vt_YmQDmxlGiZqGjEG7oRmIU_lFZiNxF/view?usp=sharing
 
 ---
 
