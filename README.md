@@ -1,5 +1,4 @@
 
-https://github.com/user-attachments/assets/f9d53d79-cf28-460e-ad33-2c362936b5d7
 # 🚀 InvestSmart
 
 **Track, Analyze, and Execute Investments with Ease**
