@@ -68,7 +68,7 @@ def get_stock_recommendations(user_stocks):
     """
 
     # Query Gemini
-    model = genai.GenerativeModel('gemini-1.5-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(prompt)
     print(f"Gemini response: {response.text}")
 

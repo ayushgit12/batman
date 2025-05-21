@@ -133,10 +133,14 @@ const StockComparisonChart = () => {
       AMZN: "#4BC0C0",
       META: "#9966FF",
       TSLA: "#FF9F40",
+      NFLX: "#FF6384",
+      NVDA: "#36A2EB",
+      AMD: "#FFCE56",
+      DIS: "#4BC0C0",
     };
 
     return (
-      colors[ticker] || `#${Math.floor(Math.random() * 16777215).toString(16)}`
+      colors[ticker] || `black` // Default color if ticker not found
     );
   };
 
